@@ -77,6 +77,26 @@ button{transition:transform .16s,border-color .15s,background .15s}button:hover:
 .game-flag{background:linear-gradient(100deg,#204b66,#0e253b);padding:12px;border-radius:10px;margin:14px 0}
 @media(max-width:700px){.ac-hero{grid-template-columns:1fr}.ac-hero-art{display:none}main{padding:12px 13px 70px}.pro-con{grid-template-columns:1fr}.aircraft-grid{grid-template-columns:1fr}header{padding:20px 14px 12px}}
 @media(prefers-reduced-motion:reduce){.aircraft-card,.game-toast,button{animation:none;transition:none!important}}
+
+/* Animated logistics flight deck: aircraft positions reflect the turn-based rules state. */
+.flight-deck{margin:15px 0 21px;border:1px solid #37617e;background:radial-gradient(ellipse at 55% 28%,#17374b,#071725 72%);border-radius:20px;padding:15px;overflow:hidden}
+.flight-deck h3{font-size:1.7em}.flight-deck-header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center}
+.flight-stage{position:relative;min-height:305px;border-radius:14px;background:repeating-linear-gradient(0deg,transparent,transparent 36px,#ffffff07 37px),repeating-linear-gradient(90deg,transparent,transparent 36px,#ffffff07 37px),linear-gradient(125deg,#12334b,#081521);border:1px solid #31556c;overflow:hidden}
+.flight-route{position:absolute;left:16%;top:52%;width:69%;height:2px;background:repeating-linear-gradient(90deg,#76d9ee 0,#76d9ee 11px,transparent 11px,transparent 21px);transform:rotate(-12deg);opacity:.53;transform-origin:left}
+.airbase-node{position:absolute;left:3%;bottom:9%;width:26%;max-width:155px;text-align:center;border:1px solid #37839a;border-radius:13px;background:#082939e8;padding:9px;color:#e7f4ff}
+.airbase-node.destination{left:auto;right:3%;top:8%;bottom:auto;border-color:#ddbb68;background:#423820df}
+.airbase-node strong{display:block;font-size:.9em}.airbase-node small{display:block;font-size:.7em}
+.flight-token{position:absolute;width:72px;height:59px;border:1px solid #4f9bb7;border-radius:13px;color:#e7fbff;background:#143447e8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transform:translate(-50%,-50%);transition:box-shadow .2s,border-color .2s;z-index:2}
+.flight-token:hover,.flight-token:focus-visible{box-shadow:0 0 0 3px #55d0e788;border-color:#8eebf7}.flight-token.selected{border:2px solid #f8d374;box-shadow:0 0 22px #f8d37477}
+.flight-token .jet{font-size:1.8rem;line-height:1;display:block;filter:drop-shadow(0 3px 4px #0009)}.flight-token small{font-weight:700;font-size:.69rem}
+.flight-token.outbound{animation:flyout 3.2s ease-in-out both;border-color:#6acb86}.flight-token.returning{animation:flyback 2.4s ease-in-out both;border-color:#f1cb71}
+@keyframes flyout{from{left:19%;top:71%}to{left:78%;top:34%}}
+@keyframes flyback{from{left:78%;top:34%}to{left:19%;top:71%}}
+@media(prefers-reduced-motion:reduce){.flight-token.outbound,.flight-token.returning,.rm .flight-token{animation:none!important}}
+.flight-detail{border:1px solid #395a72;border-radius:12px;padding:14px;background:#10283b;margin-top:12px}
+.flight-detail button{margin-right:7px;margin-bottom:7px}.flight-hint{margin:8px 0;color:#b7cfdf;font-size:.89em}
+.flight-status{font-size:.82em;color:#bce9f2}
+@media(max-width:650px){.flight-stage{min-height:265px}.airbase-node{font-size:.7em;width:31%}.flight-token{width:56px;height:51px}.flight-token .jet{font-size:1.35rem}.flight-token small{font-size:.6rem}}
 </style></head><body>
 <header><div class="radar" aria-hidden="true"></div><h1>Air &amp; Space Command Academy</h1>
 <p>Learn what each asset does, build a training force package, and load the cargo. All scenarios are fictional.</p></header>
@@ -509,6 +529,49 @@ function modalAsset(id){const a=byId[id];if(!a)return;document.getElementById('a
 function showToast(message){let area=document.getElementById('toastArea');if(!area){area=document.createElement('div');area.id='toastArea';area.className='toast-area';area.setAttribute('aria-live','polite');document.body.append(area)}const t=document.createElement('div');t.className='game-toast';t.textContent=message;area.append(t);setTimeout(()=>t.remove(),4400)}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act="showasset"],[data-act="speakasset"],[data-close-modal],[data-read-modal]');if(!el)return;if(el.dataset.closeModal){document.getElementById('assetModal')?.remove();return}if(el.dataset.readModal){const a=byId[el.dataset.readModal];if(a)say(`${a.name}. ${a.easy} Advantage: ${a.pro} Limitation: ${a.con} Support: ${a.sup}`);return}const a=byId[el.dataset.id];if(!a)return;if(el.dataset.act==='showasset')modalAsset(a.id);if(el.dataset.act==='speakasset'){say(`${a.name}. ${a.easy} Pro: ${a.pro} Con: ${a.con}`);showToast('🔊 Reading '+a.name+' aloud')}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('assetModal')?.remove()});
+
+/* ---------- PLAYABLE MOVING AIRCRAFT BOARD ----------
+   Coordinates and animations visualize real dispatch/turn state from Operation Harbor Relief.
+   The board is not a live flight simulator; flight outcomes use the game's existing rules. */
+let activeFlight=0;
+const flightIcons=['🛫','✈️','✈️','🛩️','🛩️','🛩️'];
+const missionStatus={idle:'READY',out:'OUTBOUND',back:'RETURNING',mx:'MAINTENANCE'};
+function renderFlightDeck(){
+ if(!G||G.over)return '';
+ const selected=G.ac[Math.max(0,Math.min(G.ac.length-1,activeFlight))];
+ const tok=G.ac.map((a,i)=>{
+  const left=a.st==='out'||a.st==='back'?78:19;
+  const top=a.st==='out'||a.st==='back'?34:71;
+  const offset=((i%3)-1)*75,vertical=Math.floor(i/3)*-62;
+  // Different parked/airborne positions keep all six aircraft individually clickable.
+  const style=`left:calc(${left}% + ${a.st==='out'||a.st==='back'?offset*.45:offset}px);top:calc(${top}% + ${a.st==='out'||a.st==='back'?vertical*.45:vertical}px)`;
+  const cls=a.st==='out'?'outbound':a.st==='back'?'returning':'';
+  return `<button type="button" class="flight-token ${cls} ${activeFlight===i?'selected':''}" style="${style}" data-flight="${i}" aria-label="Inspect ${esc(a.n)}, ${missionStatus[a.st]}"><span class="jet" aria-hidden="true">${flightIcons[i]}</span><small>${esc(a.n)}</small></button>`;
+ }).join('');
+ return `<section class="flight-deck"><div class="flight-deck-header"><div><span class="ac-role">LIVE MISSION BOARD • TURN ${G.turn} / 10</span><h3>Flight Operations Deck</h3></div><span class="flight-status">${G.ac.filter(a=>a.st==='out').length} outbound · ${G.ac.filter(a=>a.st==='idle').length} ready · ${G.ap} AP remaining</span></div>
+ <p class="flight-hint">Tap an aircraft, select its assigned cargo or medical mission, and dispatch it. Aircraft move across this board; delivery is adjudicated when you end the turn. Invalid dispatches do not move.</p>
+ <div class="flight-stage"><div class="flight-route" aria-hidden="true"></div><div class="airbase-node"><strong>🏠 PORT ALDER</strong><small>Starting base • fleet</small></div><div class="airbase-node destination"><strong>🏥 HARBOR CITY</strong><small>${G.rw?'Heavy runway OPEN':'Heavy runway CLOSED'}</small></div>${tok}</div>
+ <div class="flight-detail" aria-live="polite"><span class="ac-role">SELECTED AIRCRAFT</span><h3>${esc(selected.n)}</h3><p><b>Status:</b> ${missionStatus[selected.st]} · <b>Supply capacity:</b> ${selected.cap} fictional units · <b>Medical capacity:</b> ${selected.med} patients · <b>Fuel cost:</b> ${selected.fc} units</p>
+ <div class="row"><button class="on" data-flight-order="sup" ${selected.st==='idle'?'':'disabled'}>📦 Dispatch supplies</button><button data-flight-order="med" ${selected.st==='idle'&&selected.med?'':'disabled'}>🚑 Dispatch MED EVAC</button><button data-flight-advice="1">💡 Why this aircraft?</button><button data-flight-turn="1">⏭ End turn / resolve arrivals</button></div>
+ <p class="mut">${selected.cap>=16?'Heavy aircraft: check runway status before sending.':'Tactical airlift: can use the smaller airfield in this fictional scenario.'} Refueling and medical missions consume game resources when dispatched.</p></div></section>`;
+}
+const deckOldCmd=V.cmd;
+V.cmd=()=>{const content=deckOldCmd();if(!G||G.over)return content;return content.replace('<div class="hud">',renderFlightDeck()+'<div class="hud">')};
+document.addEventListener('click',e=>{
+ const flight=e.target.closest('[data-flight],[data-flight-order],[data-flight-advice],[data-flight-turn]');if(!flight||!G||G.over)return;
+ if(flight.hasAttribute('data-flight')){activeFlight=Number(flight.dataset.flight);draw();return}
+ if(flight.hasAttribute('data-flight-advice')){
+  const a=G.ac[activeFlight];showToast(a.cap>=16?'💡 '+a.n+' carries more cargo, but Harbor City needs its heavy runway repaired.':'💡 '+a.n+' has less capacity but can use Harbor City before heavy runway repairs.');return;
+ }
+ if(flight.hasAttribute('data-flight-turn')){endTurn();draw();if(G.over)showToast('🏁 Mission debrief ready!');else showToast('📡 Aircraft arrivals resolved. Review the mission log.');return}
+ if(flight.hasAttribute('data-flight-order')){
+  const a=G.ac[activeFlight],before=a.st;const fake={dataset:{i:String(activeFlight),j:flight.dataset.flightOrder}};
+  S.b=fake;CMDF.c_go();draw();
+  if(a.st==='out'&&before==='idle')showToast('🛫 '+a.n+' dispatched — flight underway! End the turn to resolve arrival.');
+  else showToast('⚠️ '+(G.msg||'Dispatch unavailable.'));
+ }
+});
+
 S.view='hangar';
 
 draw();
