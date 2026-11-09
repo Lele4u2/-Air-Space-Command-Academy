@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Air & Space Command Academy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#0b121b;--panel:#141e2b;--line:#2a3a4d;--tx:#e6edf5;--mut:#9fb0c4;--acc:#35d0e6;--ok:#6fcf8f;--bad:#f08a5d;--warn:#e8c75a;--fs:17px;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b121b}}
+:root[data-theme=light]{--bg:#eef2f6;--panel:#fff;--line:#c5d0dc;--tx:#14202e;--mut:#4a5d72;--acc:#066f82;--ok:#18793c;--bad:#b4491c;--warn:#8a6a00;color-scheme:light}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:var(--fs)/1.5 Barlow,system-ui,sans-serif}
+h1,h2,h3{font-family:'Barlow Condensed',Impact,sans-serif;letter-spacing:.02em;margin:.2em 0}
+h1{font-size:2.3em;line-height:1}h2{font-size:1.7em}h3{font-size:1.25em}
+header{padding:18px 16px 8px;max-width:1100px;margin:auto}
+header p{color:var(--mut);margin:.2em 0 0}
+nav{display:flex;gap:6px;flex-wrap:wrap;max-width:1100px;margin:8px auto;padding:0 16px}
+button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 14px;cursor:pointer}
+button:hover{border-color:var(--acc)}button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.on{background:var(--acc);color:#04222a;border-color:var(--acc);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1100px;margin:auto;padding:8px 16px 60px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.card.sel{border-color:var(--acc)}
+.tag{display:inline-block;font-size:.78em;padding:1px 8px;border:1px solid var(--line);border-radius:99px;color:var(--mut);margin:0 4px 4px 0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}.mut{color:var(--mut)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.two{display:grid;gap:14px;grid-template-columns:1fr 1fr}@media(max-width:720px){.two{grid-template-columns:1fr}}
+.bar{height:14px;background:var(--line);border-radius:7px;overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);transition:width .25s}
+.bar i.over{background:var(--bad)}
+table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}
+.opt.right{border-color:var(--ok)}.opt.wrong{border-color:var(--bad)}
+.radar{width:64px;height:64px;border-radius:50%;border:1px solid var(--acc);background:conic-gradient(from 0deg,rgba(53,208,230,.5),transparent 40%);animation:sw 4s linear infinite;float:right}
+@keyframes sw{to{transform:rotate(360deg)}}
+.rm .radar{animation:none}@media(prefers-reduced-motion:reduce){.radar{animation:none}}
+.rm .radar{animation:none}
+.plane{transition:transform 1.6s ease-in-out}
+.hud{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:10px}.hud div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}.hud b{display:block;font:700 1.5em 'Barlow Condensed',sans-serif}
+.ev{border-left:4px solid var(--warn);background:var(--panel);padding:10px 14px;margin:8px 0;border-radius:0 8px 8px 0}.tip{border-left-color:var(--acc)}
+.log{max-height:190px;overflow:auto;font-size:.9em;color:var(--mut);padding-left:18px}
+.map{background:var(--panel);border:1px solid var(--line);border-radius:8px}.map text{fill:var(--tx);font:12px Barlow,sans-serif}
+
+/* Air & Space Academy visual upgrade — aircraft imagery with accessible fallbacks */
+:root{--bg:#080f1a;--panel:#111d2d;--line:#2a4158;--acc:#59d8f6;--tx:#edf5ff;--mut:#adbbca}
+body{background:radial-gradient(ellipse at 85% -10%,rgba(40,105,146,.28),transparent 46%),linear-gradient(145deg,#07101b,#0b1523 60%,#08101b);min-height:100vh}
+header{max-width:1250px;padding:30px 24px 15px}header h1{font-size:clamp(2.2rem,4vw,4.1rem);letter-spacing:.045em;text-transform:uppercase}header p{font-size:1.05rem}
+nav,main{max-width:1250px}nav{gap:8px;padding:0 24px;margin-bottom:12px}nav button{border-radius:999px;padding:9px 15px}main{padding:18px 24px 100px}
+.card{border-radius:15px;padding:18px;background:linear-gradient(145deg,rgba(24,42,61,.98),rgba(15,28,44,.98));box-shadow:0 10px 30px #0002}
+button{transition:transform .16s,border-color .15s,background .15s}button:hover:not(:disabled){transform:translateY(-2px)}
+.aircraft-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:17px;margin:18px 0}
+.aircraft-card{padding:0;overflow:hidden;display:flex;flex-direction:column;min-height:385px;transition:transform .2s,box-shadow .2s}
+.aircraft-card:hover{transform:translateY(-4px);box-shadow:0 20px 44px #0006}
+.aircraft-photo{width:100%;height:175px;object-fit:cover;display:block;background:linear-gradient(145deg,#253951,#07101d)}
+.aircraft-photo[hidden]{display:none}
+.photo-wrap{position:relative;height:175px;overflow:hidden;background:radial-gradient(circle at 70% 10%,#345c7d,#0d1a2a 68%)}
+.photo-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#d1e8fa}
+.photo-fallback .silhouette{font-size:4.8rem;line-height:1;filter:drop-shadow(0 10px 16px #0008)}
+.photo-wrap.has-image .photo-fallback{display:none}
+.photo-credit{position:absolute;bottom:7px;right:9px;background:#0009;color:white;padding:2px 6px;border-radius:5px;font-size:.65rem}
+.ac-body{padding:15px 16px;flex:1;display:flex;flex-direction:column;gap:6px}.ac-body h3{font-size:1.45rem;margin:0}
+.ac-body p{margin:3px 0;font-size:.92rem}.ac-actions{margin-top:auto;padding-top:8px}
+.pro-con{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:7px 0}.pro-con div{padding:9px;border:1px solid var(--line);border-radius:9px;font-size:.82rem;line-height:1.35}.pro-con .positive{background:#14382855}.pro-con .negative{background:#462b2355}
+.ac-role{color:var(--acc);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.ac-hero{padding:27px;border:1px solid #335673;border-radius:19px;background:linear-gradient(112deg,#162c43,#0c1728 75%);display:grid;grid-template-columns:1.5fr 1fr;gap:15px;align-items:center;margin-bottom:21px;overflow:hidden}
+.ac-hero h2{font-size:clamp(1.9rem,4vw,3.2rem);margin:4px 0}.ac-hero p{color:#b4d0e4}.ac-hero-art{font-size:8rem;text-align:center;transform:rotate(-15deg);text-shadow:0 20px 40px #0009}
+.mini-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0 20px}
+.mini-grid button{padding:12px;text-align:left;border-radius:12px}.mini-grid .photo-wrap{height:105px;border-radius:8px;margin-bottom:9px}.mini-grid .photo-fallback .silhouette{font-size:3rem}
+.glass-modal{position:fixed;inset:0;background:#02080dcc;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}
+.glass-modal .modal-panel{width:min(720px,100%);max-height:94vh;overflow:auto;border:1px solid #46748f;border-radius:20px;background:#122236;box-shadow:0 40px 100px #000c;padding:22px}
+.glass-modal .photo-wrap{height:260px;border-radius:13px;margin:10px 0 15px}
+.glass-modal .photo-fallback .silhouette{font-size:6rem}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.toast-area{position:fixed;bottom:20px;right:20px;z-index:120;max-width:min(420px,90vw);pointer-events:none}.game-toast{background:#193a4b;border:1px solid #59d8f6;border-radius:13px;padding:13px 16px;margin-top:8px;box-shadow:0 16px 36px #0008;animation:toastin .24s ease both}
+@keyframes toastin{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+.stage-panel{padding:13px;border:1px solid #315371;border-radius:12px;background:#0b2031;margin:12px 0}
+.stage-panel h3{margin-bottom:6px}.tag{border-color:#3e5a74}
+.game-flag{background:linear-gradient(100deg,#204b66,#0e253b);padding:12px;border-radius:10px;margin:14px 0}
+@media(max-width:700px){.ac-hero{grid-template-columns:1fr}.ac-hero-art{display:none}main{padding:12px 13px 70px}.pro-con{grid-template-columns:1fr}.aircraft-grid{grid-template-columns:1fr}header{padding:20px 14px 12px}}
+@media(prefers-reduced-motion:reduce){.aircraft-card,.game-toast,button{animation:none;transition:none!important}}
+</style></head><body>
+<header><div class="radar" aria-hidden="true"></div><h1>Air &amp; Space Command Academy</h1>
+<p>Learn what each asset does, build a training force package, and load the cargo. All scenarios are fictional.</p></header>
+<nav id="nav" aria-label="Main"></nav>
+<main id="app" aria-live="polite"></main>
+<script>
+/* ---------- DATA (public-source facts only; unknowns are marked) ---------- */
+const A=[
+["f16","F-16 Fighting Falcon","Fighters","Multirole fighter","A flexible fighter.","fighter","Flexible; many mission types.","Short on range compared with big aircraft; needs tankers for long trips.","Fuel, maintenance, communications"],
+["f15c","F-15C Eagle","Fighters","Air superiority","Fights other aircraft in the air.","fighter","Built to win air-to-air fights.","Not a cargo or ground-support aircraft.","Fuel, airborne warning, communications"],
+["f15e","F-15E Strike Eagle","Fighters","Multirole strike","Fighter and ground-strike aircraft.","fighter","Does air-to-air and ground attack.","Heavier and more support-hungry than a single-role fighter.","Fuel, maintenance, communications"],
+["f22","F-22 Raptor","Fighters","Air dominance (stealth)","Stealth fighter that wins the air fight.","fighter","Stealth and sensors.","Limited numbers; high support demand.","Fuel, maintenance, command and control"],
+["f35","F-35 Lightning II","Fighters","Stealth multirole","Stealth fighter with advanced sensors.","fighter","Stealth plus strong sensors and data sharing.","Complex maintenance.","Fuel, maintenance, data links"],
+["a10","A-10 Thunderbolt II","Fighters","Close air support","Helps troops on the ground.","fighter","Built to support ground forces.","Needs a friendly air picture; not for contested skies.","Fuel, ground coordination"],
+["mq9","MQ-9 Reaper","ISR","ISR and strike","Uncrewed aircraft that watches, and can carry weapons.","isr","Long endurance without a crew onboard.","Slow; needs communications links.","Ground control, communications"],
+["u2","U-2S Dragon Lady","ISR","High-altitude reconnaissance","The high flyer.","isr","Very high altitude viewpoint.","Demanding to fly and support.","Ground station, maintenance"],
+["rc135","RC-135V/W Rivet Joint","ISR","Signals intelligence","Collects electronic signals.","isr","Detects, identifies and locates emissions.","Cannot see ground vehicles.","Fuel, analysts, communications"],
+["rc135s","RC-135S Cobra Ball","ISR","Ballistic missile intelligence","Watches missiles in flight.","isr","Specialized missile-flight collection.","Narrow mission set.","Fuel, analysts"],
+["e3","E-3 AWACS","Command & control","Airborne warning and control","Eyes in the sky: watches aircraft.","c2","Wide air picture and battle management.","Large, high-value aircraft needing protection.","Tankers, fighters, communications"],
+["e7","E-7 Wedgetail","Command & control","Airborne early warning and control","Modern flying radar.","c2","Modern radar and battle management.","Not in older exercises such as historical AFEX.","Tankers, communications"],
+["b52","B-52H Stratofortress","Bombers","Long-range strategic bomber","Large, long-range bomber.","bomber","Very long range.","Needs tankers and a defended airspace.","Fuel, maintenance"],
+["b1","B-1B Lancer","Bombers","Supersonic conventional bomber","Fast heavy bomber.","bomber","Speed and large payload.","Needs tankers and maintenance.","Fuel, maintenance"],
+["b2","B-2 Spirit","Bombers","Stealth bomber","Harder-to-detect bomber.","bomber","Low observable.","Few aircraft; heavy upkeep.","Maintenance, shelters"],
+["b21","B-21 Raider","Bombers","Next-generation stealth bomber","Future stealth bomber. Payload: Not publicly disclosed.","bomber","Future capability.","Many specifications: Not publicly disclosed.","Not publicly disclosed"],
+["c5","C-5M Super Galaxy","Mobility","Oversized strategic airlift","Carries the biggest loads. Published max payload: 281,001 lb.","airlift","Oversized cargo; nose and rear loading.","Needs large airfields and lots of support. Max payload is not on every flight.","Large runway, cargo handlers"],
+["c17","C-17 Globemaster III","Mobility","Strategic and tactical airlift","Heavy lifter that can use shorter runways. Published max payload: 170,900 lb.","airlift medevac","Heavy cargo with more airfield flexibility.","Carries less than a C-5.","Runway, cargo handlers"],
+["c130","C-130J-30 Super Hercules","Mobility","Tactical airlift","Smaller airlifter for rough, short fields. Published max payload: 44,000 lb.","airlift","Works at austere airfields.","Small payload; no oversized cargo.","Cargo handlers"],
+["kc135","KC-135 Stratotanker","Mobility","Aerial refueling","Gas station in the sky.","tanker","Extends range of other aircraft.","Fuel must be managed; needs a safe track.","Fuel, airfield"],
+["kc46","KC-46A Pegasus","Mobility","Refueling, cargo, aeromedical","Tanker that can also carry cargo and patients. Fuel 212,299 lb; cargo up to 65,000 lb.","tanker airlift medevac","Several jobs in one airframe.","Fuel and cargo trade off.","Fuel, airfield"],
+["hh60","HH-60G Pave Hawk","Mobility","Combat rescue","Helicopter that brings isolated people home.","rescue","Reaches people with no runway.","Short range; needs refueling and escort.","Tanker, medical reception"],
+["cv22","CV-22 Osprey","Mobility","Special operations transport","Tiltrotor: flies far like a plane, lands like a helicopter.","rescue airlift","Long-range tiltrotor.","Small cargo capacity.","Tanker, maintenance"],
+["gps","GPS","Space","Position, navigation, timing","Answers: where am I?","space","Global position and timing.","A receiver needs signals from at least four satellites.","Receivers, ground control"],
+["sbirs","SBIRS","Space","Missile warning","Detects missile launches.","space","Early warning from orbit.","Warns; it does not communicate or navigate.","Ground processing"],
+["aehf","AEHF","Space","Protected satellite communications","Secure, jam-resistant satellite comms.","comms","Anti-jam; resilient.","Needs compatible terminals.","Ground terminals"],
+["l16","Link 16","Space","Tactical data sharing","Shared tactical picture.","comms","Encrypted, jam-resistant data sharing.","Mostly line-of-sight; platforms need terminals.","Compatible terminals"]
+].map(a=>({id:a[0],name:a[1],cat:a[2],job:a[3],easy:a[4],tags:a[5].split(" "),pro:a[6],con:a[7],sup:a[8]}));
+const byId=Object.fromEntries(A.map(a=>[a.id,a]));
+const CATS=["All",...new Set(A.map(a=>a.cat))];
+const MISSIONS=[
+{t:"Humanitarian disaster relief",b:"A fictional storm has cut road access to a coastal region. Deliver food, water and medical supplies and move the injured.",need:[["airlift","Airlift to move supplies"],["medevac","Aeromedical capability for patients"],["comms","Communications so receiving teams are coordinated"]],bad:["fighter","bomber"]},
+{t:"ISR collection",b:"A commander needs long-endurance observation of a fictional region, with findings reported quickly.",need:[["isr","A collection asset"],["c2","Command and control to manage the picture"],["comms","A communications path to deliver the report"]],bad:["bomber","airlift"]},
+{t:"Personnel recovery",b:"A fictional crew is isolated far from any runway. Recover them and get them to medical care.",need:[["rescue","A recovery asset"],["tanker","Refueling to extend reach"],["isr","ISR to locate the people"],["c2","Command and control to coordinate"]],bad:["bomber"]}];
+const CARGO=[["Water pallets",30000,0],["Food pallets",24000,0],["Medical supplies",8000,0],["Generator set",12000,0],["Tall utility vehicle",20000,1],["Heavy loader",90000,1],["Field kitchen",14000,0]];
+const CAP={c5:281001,c17:170900,c130:44000};
+const AF={maj:["Major airfield","Accepts all three aircraft.",["c5","c17","c130"],0],sh:["Short regional runway","C-17 and C-130 only.",["c17","c130"],0],aus:["Austere strip","C-130 only.",["c130"],0]};
+
+/* ---------- STATE ---------- */
+const $=s=>document.querySelector(s);
+let P={best:0,answered:0,correct:0,missed:[],text:17,rm:0,light:0};
+try{Object.assign(P,JSON.parse(localStorage.getItem("asa")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("asa",JSON.stringify(P))}catch(e){}};
+const S={view:"cmd",cat:"All",open:null,beg:true,cmp:[],q:null,m:0,picks:[],res:null,ac:"c130",af:"maj",load:[],lres:null};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lb=n=>n.toLocaleString("en-US")+" lb";
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+function apply(){document.documentElement.style.setProperty("--fs",P.text+"px");document.documentElement.dataset.theme=P.light?"light":"dark";document.body.classList.toggle("rm",!!P.rm)}
+
+/* ---------- VIEWS ---------- */
+const V={
+hangar(){const list=A.filter(a=>S.cat=="All"||a.cat==S.cat);
+let h=`<div class="row"><label>Category <select data-chg="cat">${CATS.map(c=>`<option${c==S.cat?" selected":""}>${c}</option>`).join("")}</select></label>
+<button data-act="beg" class="${S.beg?"on":""}" aria-pressed="${S.beg}">Beginner explanations: ${S.beg?"on":"off"}</button></div>`;
+if(S.cmp.length)h+=cmpTable();
+h+=`<div class="grid">`+list.map(a=>`<div class="card ${S.open==a.id?"sel":""}"><h3>${esc(a.name)}</h3><span class="tag">${a.cat}</span>
+<p>${S.beg?esc(a.easy):esc(a.job)}</p><div class="row"><button data-act="open" data-id="${a.id}">Inspect</button>
+<button data-act="cmp" data-id="${a.id}" aria-pressed="${S.cmp.includes(a.id)}" class="${S.cmp.includes(a.id)?"on":""}">${S.cmp.includes(a.id)?"Remove":"Compare"}</button></div></div>`).join("")+`</div>`;
+if(S.open){const a=byId[S.open];h+=`<div class="card" style="margin-top:14px" id="detail" tabindex="-1"><h2>${esc(a.name)}</h2>
+<p><b>Job:</b> ${esc(a.job)}</p><p><b>In plain English:</b> ${esc(a.easy)}</p>
+<div class="two"><div><h3 class="ok">Good at</h3><p>${esc(a.pro)}</p></div><div><h3 class="bad">Limitations</h3><p>${esc(a.con)}</p></div></div>
+<p><b>Support it needs:</b> ${esc(a.sup)}</p><p class="mut">Where a figure is not listed, it is not publicly disclosed here. Verify numbers against official sources before using them in class.</p>
+<div class="row"><button data-act="quizone" data-id="${a.id}">Test me on this</button><button data-act="close">Close</button></div></div>`}
+return h},
+quiz(){const q=S.q;
+if(!q)return `<div class="card"><h2>Quiz</h2><p>Best score: ${P.best}% · Lifetime: ${P.correct}/${P.answered} correct</p><div class="row"><button class="on" data-act="qstart">Start 10 questions</button>${P.missed.length?`<button data-act="qmissed">Review ${P.missed.length} missed</button>`:""}</div></div>`;
+if(q.i>=q.items.length){const pct=Math.round(q.score/q.items.length*100);return `<div class="card"><h2>Finished: ${q.score}/${q.items.length} (${pct}%)</h2><p>${pct>=80?"Strong work. Try the force package builder next.":"Review the missed assets in the Library, then retry."}</p><div class="row"><button class="on" data-act="qstart">Try again</button><button data-act="qclose">Done</button></div></div>`}
+const it=q.items[q.i],a=byId[it.id];
+return `<div class="card"><p class="mut">Question ${q.i+1} of ${q.items.length}</p><h2>What is the primary job of the ${esc(a.name)}?</h2>
+${it.opts.map((o,k)=>{const L="ABCD"[k];let c="";if(q.done){if(o==a.job)c="right";else if(k==q.pick)c="wrong"}
+return `<button class="opt ${c}" data-act="ans" data-k="${k}" ${q.done?"disabled":""}>${L}. ${esc(o)}</button>`}).join("")}
+${q.done?`<p class="${q.pick!=null&&it.opts[q.pick]==a.job?"ok":"bad"}"><b>${it.opts[q.pick]==a.job?"Correct.":"Not quite."}</b> ${esc(a.easy)} Limitation to remember: ${esc(a.con)}</p><div class="row">${q.i>0?`<button data-act="qprev">Previous</button>`:""}<button class="on" data-act="qnext">Next</button></div>`:`<p class="mut">Pick the best answer. The explanation appears after you submit.</p>`}</div>`},
+build(){const m=MISSIONS[S.m];
+let h=`<div class="row"><label>Mission <select data-chg="m">${MISSIONS.map((x,i)=>`<option value="${i}"${i==S.m?" selected":""}>${x.t}</option>`).join("")}</select></label></div>
+<div class="card"><h3>Brief</h3><p>${m.b}</p><p class="mut">Needs: ${m.need.map(n=>n[1]).join("; ")}.</p></div>
+<h3>Your package (${S.picks.length})</h3><div class="row">${S.picks.length?S.picks.map(id=>`<button data-act="pick" data-id="${id}" class="on">${esc(byId[id].name)} ✕</button>`).join(""):`<span class="mut">Select assets below. Activate a selected asset to remove it.</span>`}</div>
+<div class="row"><button class="on" data-act="assess" ${S.picks.length?"":"disabled"}>Submit for assessment</button><button data-act="clearpk">Clear</button></div>`;
+if(S.res)h+=S.res;
+h+=`<h3>Available assets</h3><div class="row">`+A.map(a=>`<button data-act="pick" data-id="${a.id}" aria-pressed="${S.picks.includes(a.id)}" class="${S.picks.includes(a.id)?"on":""}">${esc(a.name)}</button>`).join("")+`</div>`;return h},
+logi(){const ac=S.ac,af=AF[S.af],cap=CAP[ac],tot=S.load.reduce((s,i)=>s+CARGO[i][1],0),pct=Math.min(100,tot/cap*100);
+const ok=af[2].includes(ac);
+let h=`<div class="row"><label>Aircraft <select data-chg="ac">${[["c5","C-5M"],["c17","C-17"],["c130","C-130J-30"]].map(x=>`<option value="${x[0]}"${x[0]==ac?" selected":""}>${x[1]}</option>`).join("")}</select></label>
+<label>Destination <select data-chg="af">${Object.entries(AF).map(([k,v])=>`<option value="${k}"${k==S.af?" selected":""}>${v[0]}</option>`).join("")}</select></label></div>
+<p class="${ok?"ok":"bad"}">${af[0]}: ${af[1]} ${ok?"This aircraft can land here.":"This aircraft cannot land here."}</p>
+<p>Load: <b>${lb(tot)}</b> of ${lb(cap)} published maximum payload. <span class="mut">Cargo weights here are fictional; real payload varies by flight.</span></p>
+<div class="bar" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i class="${tot>cap?"over":""}" style="width:${pct}%"></i></div>
+<div class="grid" style="margin-top:12px">`+CARGO.map((c,i)=>{const on=S.load.includes(i);return `<div class="card ${on?"sel":""}"><b>${c[0]}</b><br>${lb(c[1])} ${c[2]?`<span class="tag">oversized</span>`:""}<div class="row"><button data-act="load" data-i="${i}" class="${on?"on":""}">${on?"Unload":"Load"}</button></div></div>`}).join("")+`</div>
+<div class="row"><button class="on" data-act="launch" ${S.load.length?"":"disabled"}>Launch mission</button><button data-act="clearload">Clear load</button></div>`;
+if(S.lres)h+=S.lres;
+return h},
+cmd(){return cmdView()},
+settings(){return `<div class="card"><h2>Settings</h2><div class="row"><button data-act="tsm">Text smaller</button><button data-act="tlg">Text larger</button><span class="mut">Size ${P.text}px</span></div>
+<div class="row"><button data-act="rm" aria-pressed="${!!P.rm}" class="${P.rm?"on":""}">Reduced motion: ${P.rm?"on":"off"}</button><button data-act="light" aria-pressed="${!!P.light}" class="${P.light?"on":""}">Light theme: ${P.light?"on":"off"}</button></div>
+<div class="row"><button data-act="reset">Reset saved progress</button></div></div>
+<div class="card" style="margin-top:12px"><h3>Roadmap</h3><p>This build covers the first milestone: library, compare, quiz, package builder and logistics. Next: 3D hangar, scenario files, simulation with seeded events, multiplayer.</p><p class="mut">Public build contains only fictional scenarios. Keep restricted exercise materials out of it.</p></div>`}
+};
+function cmpTable(){const rows=[["Job","job"],["Plain English","easy"],["Good at","pro"],["Limitations","con"],["Needs","sup"]];
+return `<div class="card" style="margin-bottom:12px;overflow-x:auto"><h3>Comparison</h3><table><tr><th></th>${S.cmp.map(id=>`<th>${esc(byId[id].name)}</th>`).join("")}</tr>${rows.map(r=>`<tr><th>${r[0]}</th>${S.cmp.map(id=>`<td>${esc(byId[id][r[1]])}</td>`).join("")}</tr>`).join("")}</table></div>`}
+
+/* ---------- RULES ---------- */
+function assess(){const m=MISSIONS[S.m],cov=new Set(S.picks.flatMap(id=>byId[id].tags));
+const got=m.need.filter(n=>cov.has(n[0])),miss=m.need.filter(n=>!cov.has(n[0]));
+const needT=m.need.map(n=>n[0]);
+const extra=S.picks.filter(id=>byId[id].tags.some(t=>m.bad.includes(t))||!byId[id].tags.some(t=>needT.includes(t)));
+const score=Math.round(got.length/m.need.length*100-extra.length*10);
+S.res=`<div class="card" style="margin:12px 0"><h3>Assessment: ${Math.max(0,score)}%</h3>
+<p class="ok"><b>Matches the mission:</b> ${got.length?got.map(n=>n[1]).join("; "):"none yet"}.</p>
+<p class="bad"><b>Missing:</b> ${miss.length?miss.map(n=>n[1]).join("; "):"nothing required."}</p>
+<p class="warn"><b>Little value here:</b> ${extra.length?extra.map(id=>byId[id].name).join(", ")+". These add little to this objective.":"none."}</p>
+<p class="mut">Training feedback only. Real packages depend on orders, threats and available specifications.</p></div>`}
+function launch(){const ac=S.ac,af=AF[S.af],cap=CAP[ac],tot=S.load.reduce((s,i)=>s+CARGO[i][1],0),errs=[];
+if(!af[2].includes(ac))errs.push(`The ${byId[ac].name} cannot operate from the ${af[0].toLowerCase()}.`);
+if(tot>cap)errs.push(`Load is ${lb(tot-cap)} over the payload limit.`);
+if(ac=="c130"&&S.load.some(i=>CARGO[i][2]))errs.push("Oversized cargo does not fit a C-130J-30 in this game.");
+if(errs.length){S.lres=`<div class="card" style="margin-top:12px"><h3 class="bad">Launch rejected</h3><ul>${errs.map(e=>`<li>${e}</li>`).join("")}</ul><p>Nothing departed. Change the aircraft, destination or load and try again.</p></div>`;return}
+S.lres=`<div class="card" style="margin-top:12px"><h3 class="ok">Delivered</h3><svg viewBox="0 0 400 60" width="100%" role="img" aria-label="Aircraft flying from origin to destination"><line x1="20" y1="40" x2="380" y2="40" stroke="var(--line)" stroke-dasharray="4"/><g class="plane" id="pl" style="transform:translateX(0)"><path d="M10 40 l22-8 l-4 8 l4 8z" fill="var(--acc)"/></g></svg>
+<p>${S.load.length} items, ${lb(tot)}, delivered once. Inventory updated.</p><p class="mut">Takeaway: the best aircraft depends on cargo, runway and support, not just maximum payload.</p></div>`;
+S.anim=1}
+
+/* ---------- QUIZ ---------- */
+function mkQ(ids){const items=shuf(ids).slice(0,10).map(id=>{const a=byId[id];const others=shuf([...new Set(A.filter(x=>x.job!=a.job).map(x=>x.job))]).slice(0,3);return{id,opts:shuf([a.job,...others])}});return{items,i:0,score:0,done:false,pick:null,ids}}
+
+/* ---------- EVENTS ---------- */
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act],[data-v]");if(!b)return;
+if(b.dataset.v){S.view=b.dataset.v;return draw()}
+const a=b.dataset.act,id=b.dataset.id;
+const F={
+...CMDF,...FPF,...SBF,...FRF,beg:()=>S.beg=!S.beg,open:()=>{S.open=id;S.focus="detail"},close:()=>S.open=null,
+cmp:()=>{S.cmp=S.cmp.includes(id)?S.cmp.filter(x=>x!=id):[...S.cmp,id].slice(-3)},
+quizone:()=>{S.q=mkQ([id,...shuf(A.map(x=>x.id)).slice(0,9)]);S.q.items[0]=S.q.items.find(x=>x.id==id)||S.q.items[0];S.view="quiz"},
+qstart:()=>S.q=mkQ(A.map(x=>x.id)),qmissed:()=>S.q=mkQ(P.missed),qclose:()=>S.q=null,
+ans:()=>{const q=S.q;if(q.done)return;q.pick=+b.dataset.k;q.done=true;const it=q.items[q.i],ok=it.opts[q.pick]==byId[it.id].job;P.answered++;
+if(ok){q.score++;P.correct++;P.missed=P.missed.filter(x=>x!=it.id)}else if(!P.missed.includes(it.id))P.missed.push(it.id);
+if(q.i==q.items.length-1)P.best=Math.max(P.best,Math.round(q.score/q.items.length*100));save()},
+qnext:()=>{S.q.i++;S.q.done=false;S.q.pick=null},qprev:()=>{S.q.i--;S.q.done=true},
+pick:()=>{S.picks=S.picks.includes(id)?S.picks.filter(x=>x!=id):[...S.picks,id];S.res=null},clearpk:()=>{S.picks=[];S.res=null},assess,
+load:()=>{const i=+b.dataset.i;S.load=S.load.includes(i)?S.load.filter(x=>x!=i):[...S.load,i];S.lres=null},clearload:()=>{S.load=[];S.lres=null},launch,
+tsm:()=>{P.text=Math.max(14,P.text-1);save()},tlg:()=>{P.text=Math.min(26,P.text+1);save()},
+rm:()=>{P.rm^=1;save()},light:()=>{P.light^=1;save()},
+reset:()=>{if(confirm("Reset all saved progress?")){P={best:0,answered:0,correct:0,missed:[],text:17,rm:0,light:0};save()}}};
+S.b=b;if(F[a]){F[a]();draw()}});
+document.addEventListener("change",e=>{const k=e.target.dataset.chg;if(!k)return;const v=e.target.value;
+if(k=="wa"){S.wa=v;S.ww=[]}if(k=="pm"){clearInterval(window.T);FP=newFP(+v)}if(k=="sd_t")S.sd.t=v;if(k=="sd_b")S.sd.b=v;if(k=="sd_e")S.sd.e=v;if(k=="frs")FR=newFR(+v);if(k.startsWith("frl:")){FR.load[k.slice(4)]=v;FR.res=null}if(k=="cat")S.cat=v;if(k=="m"){S.m=+v;S.res=null;S.picks=[]}if(k=="ac"){S.ac=v;S.lres=null}if(k=="af"){S.af=v;S.lres=null}draw()});
+
+/* ---------- COMMAND GAME ---------- */
+let G=null;
+const rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const EV=[{k:"storm",t:"Storm front: no flight can arrive this turn."},{k:"quake",t:"Aftershock: the Harbor City runway is closed again."},{k:"fault",t:"Maintenance fault: an idle aircraft is grounded for 2 turns."},{k:"surge",t:"Patient surge: 4 more casualties reported."},{k:"comms",t:"Communications outage: dispatching costs 2 AP until repaired."},{k:"gift",t:"Allied fuel donation: +3 fuel."}];
+const FL=[["C-5M",26,0,2],["C-17 #1",16,6,1],["C-17 #2",16,6,1],["C-130 #1",4,2,1],["C-130 #2",4,2,1],["C-130 #3",4,2,1]];
+const L=m=>G.log.unshift("T"+G.turn+": "+m);
+function startTurn(){G.storm=false;G.ap=3;G.intel=null;const e=G.ev[G.turn];if(!e)return;L(e.t);
+if(e.k=="storm")G.storm=true;if(e.k=="quake")G.rw=false;if(e.k=="surge")G.pat+=4;if(e.k=="comms")G.comms=false;if(e.k=="gift")G.fuel+=3;
+if(e.k=="fault"){const c=G.ac.filter(a=>a.st=="idle");if(c.length){const a=c[G.r()*c.length|0];a.st="mx";a.w=2}}}
+function newG(seed){const r=rng(seed),ev=[null];for(let t=1;t<=10;t++)ev.push(t>1&&r()<.65?EV[r()*EV.length|0]:null);
+G={seed,turn:1,ap:3,fuel:10,sup:0,pat:6,evac:0,mor:0,rw:false,comms:true,storm:false,ev,r,log:[],intel:null,div:0,idle:0,apu:0,msg:"",over:false,ac:FL.map(f=>({n:f[0],cap:f[1],med:f[2],fc:f[3],st:"idle",job:"",w:0}))};
+L("The Harbor City runway is damaged. Port Alder is ready. You are in command.")}
+function endTurn(){if(G.over)return;G.apu+=G.ap;G.msg="";
+G.ac.forEach(a=>{if(a.st=="back")a.st="idle";else if(a.st=="mx"&&--a.w<=0)a.st="idle"});
+G.ac.forEach(a=>{if(a.st!="out")return;if(G.storm){L(a.n+" is holding for weather.");return}
+if(a.cap>=16&&!G.rw){G.div++;L(a.n+" diverted: runway closed to heavy aircraft. Sortie wasted.");a.st="back";return}
+if(a.job=="sup"){G.sup+=a.cap;L(a.n+" delivered "+a.cap+" supply units.")}else{const n=Math.min(a.med,G.pat);G.pat-=n;G.evac+=n;L(a.n+" evacuated "+n+" patients.")}a.st="back"});
+G.pat+=2;if(G.pat>6){G.mor+=Math.ceil((G.pat-6)/3);L("Waiting patients are straining morale.")}
+G.idle+=G.ac.filter(a=>a.st=="idle").length;
+if(G.turn>=10){G.over=true;L("Mission window closed.");return}G.turn++;startTurn()}
+function score(){const s=Math.min(100,G.sup/120*100),e=Math.min(100,G.evac/16*100),m=Math.max(0,100-G.mor*6);return{s:Math.round(s),e:Math.round(e),m:Math.round(m),t:Math.round(s*.5+e*.3+m*.2)}}
+function hint(){if(!G.rw)return "Heavy aircraft (C-5, C-17) cannot land at Harbor City until engineers clear the runway. Clear it before sending them.";
+if(!G.comms)return "Comms are down, so every dispatch costs 2 AP. Repair them.";if(G.fuel<3)return "Fuel is low. Order a fuel convoy before it limits your sorties.";
+if(G.pat>=6)return "Patients are piling up. Send an aeromedical sortie: C-17s carry the most.";if(G.ac.some(a=>a.st=="mx"))return "An aircraft is in maintenance. Expedite repairs if you have spare AP.";
+if(G.ac.some(a=>a.st=="idle"))return "Idle aircraft deliver nothing. Dispatch them while you have AP.";return "Everything is moving. Spend spare AP on recon to see next turn’s event."}
+const CMDF={c_start:()=>newG(Math.random()*9999|0),c_replay:()=>newG(G.seed),c_quit:()=>G=null,c_end:endTurn,
+c_go:()=>{const d=S.b.dataset,a=G.ac[+d.i],c=G.comms?1:2;G.msg="";
+if(a.st!="idle")G.msg="That aircraft is not available.";else if(G.ap<c)G.msg="Not enough action points. End the turn.";else if(G.fuel<a.fc)G.msg="Not enough fuel. Order a fuel convoy.";
+else{G.ap-=c;G.fuel-=a.fc;a.st="out";a.job=d.j;L(a.n+" departs with "+(d.j=="sup"?"supplies":"medical teams")+".")}},
+c_clear:()=>{if(G.ap<1)return G.msg="No action points left.";G.ap--;G.rw=true;L("Engineers cleared the Harbor City runway.")},
+c_comms:()=>{if(G.ap<1)return G.msg="No action points left.";G.ap--;G.comms=true;L("Communications restored.")},
+c_fuel:()=>{if(G.ap<1)return G.msg="No action points left.";G.ap--;G.fuel+=3;L("Fuel convoy arrived: +3 fuel.")},
+c_fix:()=>{const a=G.ac.find(x=>x.st=="mx");if(!a)return G.msg="No aircraft in maintenance.";if(G.ap<1)return G.msg="No action points left.";G.ap--;a.st="idle";L(a.n+" repaired early.")},
+c_recon:()=>{if(G.ap<1)return G.msg="No action points left.";G.ap--;const e=G.ev[G.turn+1];G.intel=G.turn>=10?"Final turn: nothing beyond it.":e?e.t:"Quiet skies expected next turn.";L("Recon report: "+G.intel)},
+c_hint:()=>G.msg="Advisor: "+hint()};
+function cmdView(){
+if(!G)return `<div class="card"><h2>Operation Harbor Relief</h2><p>A fictional cyclone has hit Harbor City. You command the air mobility response from Port Alder. You have <b>10 turns</b> and <b>3 action points (AP)</b> each turn.</p>
+<ul><li>Deliver <b>120 supply units</b> and evacuate <b>16 patients</b>.</li><li>C-5 and C-17 need a cleared runway. C-130s can always land.</li><li>Fuel is limited. Storms, aftershocks and breakdowns will hit you.</li><li>Recon shows next turn’s event. Idle aircraft deliver nothing.</li></ul>
+<div class="row"><button class="on" data-act="c_start">Take command</button></div><p class="mut">Training game with fictional rules. Payload ratios follow the published C-5M, C-17 and C-130J-30 figures.</p></div>`;
+if(G.over){const s=score(),r=s.t>=80?["MISSION COMPLETE","ok"]:s.t>=55?["PARTIAL SUCCESS","warn"]:["MISSION NOT ACCOMPLISHED","bad"];
+return `<div class="card"><h2 class="${r[1]}">${r[0]} · ${s.t}%</h2><p>Supplies ${G.sup}/120 (${s.s}%) · Patients ${G.evac}/16 (${s.e}%) · Morale ${s.m}% · Seed ${G.seed}</p>
+<h3>Debrief</h3><ul>${G.div?`<li class="bad">${G.div} heavy sortie(s) were wasted on a closed runway. Check runway status before dispatching.</li>`:`<li class="ok">No sorties wasted on closed runways.</li>`}
+<li>${G.apu?`You left ${G.apu} action points unused. Proactive commanders spend them on recon, repairs or fuel.`:`You used every action point.`}</li>
+<li>${G.idle>12?`Aircraft sat idle for ${G.idle} aircraft-turns. Keep the fleet cycling.`:`Fleet utilization was strong.`}</li>
+<li>${G.mor>6?`Patients waited too long. Aeromedical sorties protect morale.`:`Patient care kept morale stable.`}</li>
+<li class="mut">Lesson: the C-5 moves the most per flight, but it needs a runway and burns more fuel. C-130s are slower to build a stockpile but go anywhere. The best choice depends on the conditions, not the biggest payload.</li></ul>
+<div class="row"><button class="on" data-act="c_replay">Replay same seed</button><button data-act="c_start">New scenario</button><button data-act="c_quit">Exit</button></div>
+<h3>Mission log</h3><ol class="log" style="max-height:none">${G.log.slice().reverse().map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`}
+const lx=(i,t)=>[100+(500-100)*t+i*6,230-(230-90)*t-i*4];
+const tok=G.ac.map((a,i)=>{let x,y,c="var(--acc)";if(a.st=="idle"){x=50+i*26;y=245}else if(a.st=="mx"){x=50+i*26;y=275;c="var(--bad)"}else{[x,y]=lx(i,a.st=="out"?.6:.35);c=a.st=="out"?"var(--ok)":"var(--warn)"}
+return `<g><circle cx="${x}" cy="${y}" r="11" fill="${c}"/><text x="${x}" y="${y+4}" text-anchor="middle" style="fill:#04222a;font-weight:700">${a.n.split(" ")[0].replace("C-","").replace("M","")}</text></g>`}).join("");
+return `<div class="hud"><div>Turn<b>${G.turn}/10</b></div><div>Action points<b>${G.ap}/3</b></div><div>Fuel<b>${G.fuel}</b></div><div>Supplies<b>${G.sup}/120</b></div><div>Patients waiting<b class="${G.pat>6?"bad":""}">${G.pat}</b></div><div>Evacuated<b>${G.evac}/16</b></div></div>
+${G.ev[G.turn]?`<div class="ev"><b>Event:</b> ${G.ev[G.turn].t}</div>`:""}${G.intel?`<div class="ev tip"><b>Recon:</b> ${G.intel}</div>`:""}${G.msg?`<div class="ev ${G.msg.startsWith("Advisor")?"tip":""}" role="alert">${esc(G.msg)}</div>`:""}
+<svg class="map" viewBox="0 0 600 300" role="img" aria-label="Theater map: Port Alder to Harbor City"><line x1="100" y1="230" x2="500" y2="90" stroke="var(--line)" stroke-width="3" stroke-dasharray="8"/>
+<text x="30" y="215">Port Alder (home base)</text><text x="390" y="70">Harbor City (disaster zone)</text><text x="390" y="112" style="fill:${G.rw?"var(--ok)":"var(--bad)"}">Runway: ${G.rw?"clear":"closed to heavy aircraft"}</text>
+<text x="30" y="20" style="fill:${G.comms?"var(--ok)":"var(--bad)"}">Comms: ${G.comms?"online":"OUTAGE"}</text>${G.storm?`<text x="260" y="40" style="fill:var(--warn);font-size:16px">STORM: arrivals blocked</text>`:""}${tok}</svg>
+<h3>Actions</h3><div class="row"><button data-act="c_clear" ${G.rw?"disabled":""}>Clear runway (1 AP)</button><button data-act="c_fuel">Fuel convoy +3 (1 AP)</button><button data-act="c_recon">Recon next turn (1 AP)</button>${G.comms?"":`<button data-act="c_comms">Repair comms (1 AP)</button>`}<button data-act="c_fix">Expedite repair (1 AP)</button><button data-act="c_hint">Ask advisor</button><button class="on" data-act="c_end">End turn</button></div>
+<h3>Fleet</h3><table><tr><th>Aircraft</th><th>Status</th><th>Capacity</th><th>Orders (cost ${G.comms?1:2} AP)</th></tr>${G.ac.map((a,i)=>`<tr><td>${a.n}</td><td>${{idle:"Ready",out:"Outbound",back:"Returning",mx:"Maintenance"}[a.st]}</td><td>${a.cap} supplies${a.med?" / "+a.med+" patients":""} · fuel ${a.fc}</td><td><button data-act="c_go" data-i="${i}" data-j="sup" ${a.st=="idle"?"":"disabled"}>Supplies</button> <button data-act="c_go" data-i="${i}" data-j="med" ${a.st=="idle"&&a.med?"":"disabled"}>Medevac</button></td></tr>`).join("")}</table>
+<h3>Mission log</h3><ol class="log" reversed>${G.log.slice(0,10).map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`}
+/* ---------- WEAPONS + 4-STEP PACKAGE ---------- */
+const W={};[
+["aim120","AIM-120 AMRAAM","Air-to-air missile","Engage aircraft beyond visual range","Active radar","f15c f15e f16 f22 f35","Radar missile for far-away jets.","Long reach; guides itself late in flight.","Air targets only; needs good targeting data."],
+["aim9","AIM-9 Sidewinder","Air-to-air missile","Short-range engagement of aircraft","Infrared (heat-seeking)","f15c f15e f16 f22 f35 a10","Heat-seeking missile for close fights.","Passive guidance; agile at close range.","Short range; air targets only."],
+["harm","AGM-88 HARM","Anti-radiation missile","Suppress or destroy radar emitters","Passive radar homing","f16","Homes in on radar signals.","Targets the radar itself.","Needs the radar to be transmitting; only radar-type targets."],
+["agm65k","AGM-65K Maverick","Air-to-ground missile","Precision attack on point targets","Electro-optical (TV imaging)","a10 f16 f15e","Camera-guided missile for small targets.","Precise against point targets.","Needs a clear view of the target; weather and smoke matter."],
+["jsow","AGM-154A JSOW","Glide weapon","Attack from a stand-off distance","GPS and inertial","f16 f15e b52 b1","Glider bomb launched from far away.","Keeps the aircraft farther from defenses.","Aimed at fixed locations; depends on GPS accuracy."],
+["jdam","GBU-31 JDAM","Guided bomb","Precision attack in poor weather","GPS and inertial","f16 f15e a10 f22 f35 b52 b1 b2","Bomb with a GPS guidance kit.","Works through weather; common across many aircraft.","Aimed at fixed locations; not for moving targets."],
+["calcm","AGM-86C CALCM","Cruise missile","Long-range precision attack","GPS and inertial","b52","Long-range missile launched from a bomber.","Very long reach.","Few carrier aircraft; fixed locations only."],
+["bsu49","BSU-49","Bomb tail (retarder)","Slows a bomb so the aircraft can release low","None (drag device, unguided)","f15e f16 a10","A brake for a bomb, not a guided weapon.","Allows low-level release.","Not guided; not a weapon by itself."],
+["bsu50","BSU-50","Bomb tail (retarder)","Slows a bomb so the aircraft can release low","None (drag device, unguided)","f15e f16 a10","A brake for a bomb, like the BSU-49.","Allows low-level release.","Not guided; not a weapon by itself."],
+["hydra","Hydra 70","Unguided rocket","Close-range attack on nearby targets","Unguided","a10","Simple rockets for close support.","Simple and carries many rockets.","Short range; not precise; risky near friendly forces."]
+].forEach(r=>W[r[0]]={id:r[0],n:r[1],cat:r[2],job:r[3],gd:r[4],ac:r[5].split(" "),easy:r[6],pro:r[7],con:r[8]});
+const say=t=>{try{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t))}catch(e){}};
+function loadout(aid,ws){const a=byId[aid];if(!a)return"";const sp=ws.slice(0,6);
+return `<svg viewBox="0 0 400 150" class="map" role="img" aria-label="${esc(a.name)} loadout: ${esc(sp.map(x=>W[x].n).join(", ")||"empty")}"><rect x="40" y="65" width="320" height="20" rx="10" fill="var(--line)"/><polygon points="170,75 230,75 290,20 250,20" fill="var(--line)"/><polygon points="170,75 230,75 290,130 250,130" fill="var(--line)"/><text x="200" y="146" text-anchor="middle">${esc(a.name)}</text>${sp.map((x,i)=>{const px=150+i%3*40,py=i<3?36:104;return `<rect x="${px}" y="${py}" width="32" height="9" rx="4" fill="var(--acc)"/><text x="${px+16}" y="${py+(i<3?-3:20)}" text-anchor="middle" style="font-size:9px">${esc(W[x].n.split(" ")[0])}</text>`}).join("")}</svg>`}
+const EF=[["Destroy","Make the target permanently unable to function.","A bridge dropped into a river."],["Degrade","Reduce how well it works for a time. It still works, but worse.","Jamming slows radar updates."],["Damage","Harm it so capability drops, but it can be repaired.","A cratered ramp that crews can patch."],["Deny","Keep the enemy from using a place or capability.","Closing an airstrip so aircraft cannot use it."],["Suppress","Temporarily stop it from firing or operating, usually while you are present.","Radar operators shut down while friendly aircraft pass."],["Neutralize","Make a specific threat ineffective for a period.","Stopping an armored column from reaching friendly troops."]];
+const PM=[{t:"Defend friendly airspace",b:"Fictional raiders are approaching Allied territory. Protect friendly airspace and critical sites.",e:"Destroy",good:["aim120","aim9"],best:["f15c","f22"],thr:["air","ew","fuel","comms"],sup:["c2","tanker","link16","weather","mx"],crit:["c2","tanker"]},
+{t:"Suppress air defenses",b:"Friendly aircraft must cross a fictional zone covered by hostile radar-guided defenses.",e:"Suppress",good:["harm"],best:["f16"],thr:["radar","ew","comms","fuel"],sup:["isr","ew","c2","tanker","gps","csar"],crit:["ew","isr"]},
+{t:"Deny a fictional airstrip",b:"Hostile aircraft are using a remote fictional airstrip. Keep them from using it.",e:"Deny",good:["jdam","jsow","calcm"],best:["b52","f15e","b1","b2"],thr:["radar","range","weather","comms"],sup:["isr","tanker","gps","weather","c2","csar"],crit:["tanker","isr"]},
+{t:"Support friendly ground forces",b:"A fictional armored force threatens friendly troops, and friendly forces are close to it.",e:"Neutralize",good:["agm65k","hydra"],best:["a10"],thr:["near","air","weather","comms"],sup:["c2","isr","comms","csar","weather","med"],crit:["comms","c2"]}];
+const THR={air:"Enemy aircraft",radar:"Radar-guided air defenses",ew:"Electronic interference (jamming)",fuel:"Fuel limits",range:"Range limits",weather:"Weather",comms:"Communications loss",near:"Friendly forces close to the target",cargo:"Cargo weight limits",pat:"Patient surge"};
+const SUP={isr:["ISR and reconnaissance","Finds and watches activity.","Without it you plan blind.","No current reconnaissance. Cannot confirm the area. Mission scrubbed."],c2:["Airborne command and control (E-3/E-7)","Builds the air picture and directs aircraft.","Without it coordination suffers.","No controller on frequency. Air picture unavailable. Mission scrubbed."],ew:["Electronic warfare","Disrupts enemy radar and communications.","Without it radar threats hit harder.","Radar threat active and no jamming support. Mission scrubbed."],tanker:["Aerial refueling (KC-135/KC-46A)","Extends range and time on station.","Without it aircraft run short of fuel.","No tanker. Fuel state critical. Aborting and returning to base."],gps:["GPS and navigation","Gives position and timing.","Without it navigation and guided weapons degrade.","GPS degraded. Navigation accuracy reduced."],comms:["AEHF and communications","Secure links to commanders and units.","Without it orders and reports are delayed.","Cannot reach command. Holding for orders. Mission scrubbed."],link16:["Link 16 data sharing","Shares one tactical picture.","Without it crews see less of the fight.","No shared picture. Crews are working with limited awareness."],weather:["Weather","Forecasts hazards.","Without it storms can surprise you.","Unforecast weather on route. Delays and diversions."],mx:["Maintenance and logistics","Keeps aircraft ready.","Without it aircraft are not available.","Aircraft readiness reduced. A spare is not available."],med:["Medical support","Treats the injured.","Without it casualties are not cared for.","No medical reception ready for casualties."],csar:["Combat search and rescue","Recovers isolated crew.","Without it a lost crew may not come home.","No recovery force on call. Risk to crew is higher."]};
+const newFP=m=>({m,step:0,eff:null,msg:"",w:null,ac:null,thr:[],sup:[],sim:-1,lines:[]});
+let FP=newFP(0);S.wa="f16";S.ww=[];S.wq=null;
+function fpEval(){const m=PM[FP.m],wg=m.good.includes(FP.w),ab=m.best.includes(FP.ac);
+const tOk=FP.thr.filter(t=>m.thr.includes(t)),tBad=FP.thr.filter(t=>!m.thr.includes(t)),tMiss=m.thr.filter(t=>!FP.thr.includes(t));
+const sOk=m.sup.filter(s=>FP.sup.includes(s)),sMiss=m.sup.filter(s=>!FP.sup.includes(s)),sExtra=FP.sup.filter(s=>!m.sup.includes(s)),crit=m.crit.filter(s=>!FP.sup.includes(s));
+const sc=10+(wg?20:8)+(ab?10:4)+Math.max(0,Math.round(25*(tOk.length-tBad.length)/m.thr.length))+Math.max(0,Math.round(35*sOk.length/m.sup.length)-5*sExtra.length);
+const L=[["Takeoff","Flight is airborne from the main operating base. "+byId[FP.ac].name+" is carrying "+W[FP.w].n+"."]];let abort=false;
+for(const s of ["tanker","c2","isr","ew","comms"]){if(!m.sup.includes(s))continue;if(FP.sup.includes(s))L.push([SUP[s][0],"Support check: "+SUP[s][1].toLowerCase()]);else if(m.crit.includes(s)){L.push([SUP[s][0],SUP[s][3],1]);abort=true;break}else L.push([SUP[s][0],SUP[s][3],1])}
+if(!abort){sMiss.filter(s=>!["tanker","c2","isr","ew","comms"].includes(s)).forEach(s=>L.push([SUP[s][0],SUP[s][3],1]));
+L.push(["Mission",wg?"Weapon employed as planned. Effect reported: "+m.e+" achieved.":"Weapon was a poor fit for this effect. Effect only partly achieved.",!wg]);L.push(["Landing","Aircraft recovered at base."])}
+else L.push(["Landing","Aircraft returned. Desired effect ("+m.e+") not achieved."]);
+const res=abort?["MISSION NOT ACCOMPLISHED","bad"]:sc>=75?["MISSION COMPLETE","ok"]:sc>=50?["PARTIAL SUCCESS","warn"]:["MISSION NOT ACCOMPLISHED","bad"];
+return{wg,ab,tOk,tBad,tMiss,sOk,sMiss,sExtra,crit,sc,L,res,abort}}
+const FPF={fp_eff:()=>{const i=+S.b.dataset.i,m=PM[FP.m];if(EF[i][0]==m.e){FP.eff=m.e;FP.msg="Correct. "+EF[i][0]+" fits this mission.";FP.step=1}else FP.msg=EF[i][0]+" means: "+EF[i][1]+" That is not the best match for this objective. Reread the brief."},
+fp_w:()=>FP.w=S.b.dataset.id,fp_a:()=>FP.ac=S.b.dataset.id,
+fp_next:()=>{if(FP.step==1){if(!FP.w||!FP.ac)return FP.msg="Choose a weapon and an aircraft first.";if(!W[FP.w].ac.includes(FP.ac))return FP.msg="Blocked: "+W[FP.w].n+" is not listed for the "+byId[FP.ac].name+". Pick a compatible pair.";if(FP.w=="bsu49"||FP.w=="bsu50")return FP.msg="The "+W[FP.w].n+" is a bomb tail, not a weapon on its own. Choose a weapon.";}
+FP.msg="";FP.step++},fp_back:()=>{FP.msg="";FP.step=Math.max(1,FP.step-1)},
+fp_t:()=>{const t=S.b.dataset.id;FP.thr=FP.thr.includes(t)?FP.thr.filter(x=>x!=t):[...FP.thr,t]},
+fp_s:()=>{const t=S.b.dataset.id;FP.sup=FP.sup.includes(t)?FP.sup.filter(x=>x!=t):[...FP.sup,t]},
+fp_go:()=>{const e=fpEval();FP.ev=e;FP.lines=e.L;FP.sim=0;FP.step=4;clearInterval(window.T);window.T=setInterval(()=>{if(FP.sim>=FP.lines.length+1){clearInterval(window.T);return}FP.sim++;draw()},P.rm?250:1300)},
+fp_replay:()=>{clearInterval(window.T);FP=newFP(FP.m)},fp_say:()=>say(PM[FP.m].b),fp_sayr:()=>say(FP.lines.slice(0,FP.sim).map(l=>l[1]).join(" ")),
+w_tog:()=>{const id=S.b.dataset.id;S.ww=S.ww.includes(id)?S.ww.filter(x=>x!=id):[...S.ww,id]},w_say:()=>{const w=W[S.b.dataset.id];say(w.n+". "+w.easy+" Guidance: "+w.gd+". Limit: "+w.con)},
+w_quiz:()=>{const k=Object.values(W),w=k[Math.random()*k.length|0];S.wq={id:w.id,opts:shuf([...new Set([w.gd,...shuf([...new Set(k.map(x=>x.gd))].filter(g=>g!=w.gd)).slice(0,3)])]),pick:null}},
+w_ans:()=>{S.wq.pick=+S.b.dataset.k}};
+document.addEventListener("dragstart",e=>{const c=e.target.closest("[data-drag]");if(c)e.dataTransfer.setData("text/plain",c.dataset.drag)});
+document.addEventListener("dragover",e=>{if(e.target.closest("[data-drop]"))e.preventDefault()});
+document.addEventListener("drop",e=>{if(!e.target.closest("[data-drop]"))return;e.preventDefault();const s=e.dataTransfer.getData("text/plain");if(SUP[s]&&!FP.sup.includes(s)&&FP.step==3){FP.sup.push(s);draw()}});
+const acName=id=>byId[id]?byId[id].name:id;
+V.wpn=()=>{const acs=A.filter(a=>["Fighters","Bombers"].includes(a.cat)),ok=S.ww.filter(w=>W[w].ac.includes(S.wa)),bad=S.ww.filter(w=>!W[w].ac.includes(S.wa)),q=S.wq;
+return `<div class="card"><h2>Weapons Academy</h2><p class="warn">Public-source summary for learning, not an official compatibility chart. Confirm against your approved AFEX materials. Anything not listed is not covered here.</p>
+<div class="row"><label>Aircraft <select data-chg="wa">${acs.map(a=>`<option value="${a.id}"${a.id==S.wa?" selected":""}>${esc(a.name)}</option>`).join("")}</select></label><span class="mut">Select weapons below to hang them on the aircraft.</span></div>${loadout(S.wa,ok)}
+${bad.length?`<div class="ev" role="alert"><b>Incompatible:</b> ${bad.map(w=>W[w].n).join(", ")} not listed for the ${esc(acName(S.wa))}. Not attached.</div>`:""}</div>
+<div class="row"><button data-act="w_quiz">Quiz me on guidance types</button></div>
+${q?`<div class="card"><h3>What guidance does the ${W[q.id].n} use?</h3>${q.opts.map((o,k)=>`<button class="opt ${q.pick!=null?(o==W[q.id].gd?"right":k==q.pick?"wrong":""):""}" data-act="w_ans" data-k="${k}" ${q.pick!=null?"disabled":""}>${"ABCD"[k]}. ${esc(o)}</button>`).join("")}${q.pick!=null?`<p>${q.opts[q.pick]==W[q.id].gd?"Correct. ":"Not quite. "}${esc(W[q.id].easy)}</p>`:""}</div>`:""}
+<div class="grid" style="margin-top:12px">${Object.values(W).map(w=>`<div class="card ${S.ww.includes(w.id)?"sel":""}"><h3>${w.n}</h3><span class="tag">${w.cat}</span><p>${esc(w.easy)}</p><p><b>Purpose:</b> ${esc(w.job)}<br><b>Guidance:</b> ${esc(w.gd)}</p><p class="ok">+ ${esc(w.pro)}</p><p class="bad">\u2212 ${esc(w.con)}</p><p class="mut">Listed aircraft: ${w.ac.map(acName).join(", ")}</p><div class="row"><button data-act="w_tog" data-id="${w.id}" class="${S.ww.includes(w.id)?"on":""}" aria-pressed="${S.ww.includes(w.id)}">${S.ww.includes(w.id)?"Remove":"Add to loadout"}</button><button data-act="w_say" data-id="${w.id}">Read to me</button></div></div>`).join("")}</div>`};
+V.pkg=()=>{const m=PM[FP.m],st=FP.step;
+let h=`<div class="row"><label>Mission <select data-chg="pm">${PM.map((x,i)=>`<option value="${i}"${i==FP.m?" selected":""}>${esc(x.t)}</option>`).join("")}</select></label><span class="mut">Effect, then weapon and aircraft, then threats, then support, then launch.</span></div>
+<div class="row">${["1 Effect","2 Weapon and aircraft","3 Threats","4 Support","Mission"].map((x,i)=>`<span class="tag ${i==st?"on":""}" style="${i==st?"border-color:var(--acc);color:var(--acc)":""}">${x}</span>`).join("")}</div>
+<div class="card"><h3>Mission brief</h3><p>${esc(m.b)}</p><button data-act="fp_say">Read to me</button></div>${FP.msg?`<div class="ev ${FP.msg.startsWith("Correct")?"tip":""}" role="alert">${esc(FP.msg)}</div>`:""}`;
+if(st==0)h+=`<h3>Step 1: What effect do you need?</h3><div class="grid">${EF.map((e,i)=>`<div class="card"><h3>${e[0]}</h3><p>${e[1]}</p><p class="mut">Example: ${e[2]}</p><button data-act="fp_eff" data-i="${i}">Choose ${e[0]}</button></div>`).join("")}</div>`;
+if(st==1){const ok=FP.w&&FP.ac&&W[FP.w].ac.includes(FP.ac),w=FP.w&&FP.ac;
+h+=`<h3>Step 2: Select weapon and aircraft</h3><p>Effect: <b>${FP.eff}</b></p><div class="two"><div><h3>Weapon</h3>${Object.values(W).map(x=>`<button class="opt ${FP.w==x.id?"on":""}" data-act="fp_w" data-id="${x.id}">${x.n} <span class="mut">${x.cat}</span></button>`).join("")}</div><div><h3>Aircraft</h3>${A.filter(a=>["Fighters","Bombers"].includes(a.cat)).map(x=>`<button class="opt ${FP.ac==x.id?"on":""}" data-act="fp_a" data-id="${x.id}">${x.name}</button>`).join("")}</div></div>
+${w?loadout(FP.ac,ok?[FP.w]:[]):""}${w?(ok?`<p class="ok">Compatible: ${W[FP.w].n} is listed for the ${acName(FP.ac)}.</p>`:`<div class="ev" role="alert"><b>Warning:</b> ${W[FP.w].n} is not listed for the ${acName(FP.ac)} in these notes. Choose a compatible pair.</div>`):""}
+${FP.w?`<p><b>${W[FP.w].n}:</b> ${esc(W[FP.w].job)}. Guidance: ${esc(W[FP.w].gd)}. Limit: ${esc(W[FP.w].con)}</p>`:""}<div class="row"><button class="on" data-act="fp_next">Next: threats</button></div>`}
+if(st==2)h+=`<h3>Step 3: Which threats and limits apply?</h3><p class="mut">Tick everything that could stop this mission. Some options do not apply.</p><div class="row">${Object.keys(THR).filter(k=>m.thr.includes(k)||["cargo","pat"].includes(k)).map(k=>`<button data-act="fp_t" data-id="${k}" aria-pressed="${FP.thr.includes(k)}" class="${FP.thr.includes(k)?"on":""}">${THR[k]}</button>`).join("")}</div><div class="row"><button data-act="fp_back">Back</button><button class="on" data-act="fp_next">Next: support</button></div>`;
+if(st==3){const rest=Object.keys(SUP).filter(k=>!FP.sup.includes(k));
+h+=`<h3>Step 4: Coordinate detached support</h3><p class="mut">Drag support onto the board, or press a button. Press a board item to remove it.</p><div class="card" data-drop="1" style="min-height:70px;border-style:dashed"><b>Support board</b><div class="row">${FP.sup.map(k=>`<button class="on" data-act="fp_s" data-id="${k}">${SUP[k][0]} \u2715</button>`).join("")||`<span class="mut">Empty</span>`}</div></div>
+<div class="row">${rest.map(k=>`<button draggable="true" data-drag="${k}" data-act="fp_s" data-id="${k}" title="${esc(SUP[k][1]+" "+SUP[k][2])}">${SUP[k][0]}</button>`).join("")}</div>${FP.sup.length?`<ul>${FP.sup.map(k=>`<li><b>${SUP[k][0]}:</b> ${SUP[k][1]} ${SUP[k][2]}</li>`).join("")}</ul>`:""}
+<div class="row"><button data-act="fp_back">Back</button><button class="on" data-act="fp_go" ${FP.sup.length?"":"disabled"}>Submit and launch</button></div>`}
+if(st==4){const e=FP.ev,n=FP.lines.length,done=FP.sim>=n,i=Math.min(FP.sim,n-1),x=60+(i/Math.max(1,n-1))*480;
+h+=`<h3>Mission</h3><svg viewBox="0 0 600 120" class="map" role="img" aria-label="Mission progress"><line x1="60" y1="60" x2="540" y2="60" stroke="var(--line)" stroke-dasharray="6" stroke-width="3"/><text x="30" y="95">Base</text><text x="510" y="95">Target</text>${m.thr.includes("radar")?`<circle cx="540" cy="60" r="28" fill="none" stroke="var(--bad)"/>`:""}<circle cx="${e.abort&&i>=n-2?Math.min(x,300):x}" cy="60" r="10" fill="var(--acc)"/></svg>
+<h3>Radio</h3><ul>${FP.lines.slice(0,FP.sim).map(l=>`<li class="${l[2]?"bad":""}"><b>${esc(l[0])}:</b> ${esc(l[1])}</li>`).join("")}</ul><button data-act="fp_sayr">Read radio aloud</button>`;
+if(done){const r=e.res;h+=`<div class="card" style="margin-top:12px"><h2 class="${r[1]}">${r[0]} \u00b7 ${e.sc}%</h2><h3>After-action debrief</h3><ul>
+<li>Effect: <b>${m.e}</b> was correct for this mission.</li>
+<li class="${e.wg?"ok":"warn"}">${W[FP.w].n} ${e.wg?"matched the effect.":"is compatible but not the best fit for this effect."} ${acName(FP.ac)} ${e.ab?"suited the role.":"is workable but not the best choice."}</li>
+<li>Threats: ${e.tOk.length?"identified "+e.tOk.map(k=>THR[k]).join(", ")+". ":"none identified. "}${e.tMiss.length?"Missed: "+e.tMiss.map(k=>THR[k]).join(", ")+". ":""}${e.tBad.length?"Not relevant here: "+e.tBad.map(k=>THR[k]).join(", ")+".":""}</li>
+<li class="ok">Support covered: ${e.sOk.map(k=>SUP[k][0]).join(", ")||"none"}.</li>
+${e.sMiss.length?`<li class="bad">Missing: ${e.sMiss.map(k=>SUP[k][0]+" ("+SUP[k][2].replace("Without it ","if absent, ")+")").join("; ")}</li>`:""}
+${e.sExtra.length?`<li class="warn">Unnecessary here: ${e.sExtra.map(k=>SUP[k][0]).join(", ")}.</li>`:""}
+</ul><p class="mut">Training score for this game only. Fictional scenario; not a targeting or employment guide.</p><div class="row"><button class="on" data-act="fp_replay">Replay and improve</button></div></div>`}}
+return h};
+/* ---------- SCENARIO BUILDER ---------- */
+const BASEN=PM.length,TK=["air","radar","ew","fuel","range","weather","comms","near"];
+if(!Array.isArray(P.scn))P.scn=[];
+const syncPM=()=>{PM.length=BASEN;P.scn.forEach(s=>PM.push(s))};
+const blank=()=>({t:"",b:"",e:"Destroy",good:[],best:[],thr:[],sup:[],crit:[],custom:1});
+S.sd=blank();S.si=-1;S.sm="";S.sx="";
+const clean=o=>{o=o||{};const f=(a,ok)=>Array.isArray(a)?[...new Set(a.filter(ok))]:[];const sup=f(o.sup,x=>SUP[x]);
+return{t:String(o.t||"").trim().slice(0,60),b:String(o.b||"").trim().slice(0,400),e:EF.some(x=>x[0]==o.e)?o.e:"Destroy",good:f(o.good,x=>W[x]&&!/^bsu/.test(x)),best:f(o.best,x=>byId[x]&&["Fighters","Bombers"].includes(byId[x].cat)),thr:f(o.thr,x=>TK.includes(x)),sup,crit:f(o.crit,x=>sup.includes(x)),custom:1}};
+function vcheck(d){const e=[];if(!d.t)e.push("Add a mission title.");if(!d.b)e.push("Add a brief.");if(!d.good.length)e.push("Choose at least one suitable weapon.");if(!d.best.length)e.push("Choose at least one best-suited aircraft.");
+if(d.good.length&&d.best.length&&!d.good.some(g=>d.best.some(a=>W[g].ac.includes(a))))e.push("None of the chosen weapons is listed for any chosen aircraft, so players could not build a valid pair.");
+if(!d.thr.length)e.push("Choose at least one real threat.");if(!d.sup.length)e.push("Choose at least one required support.");return e}
+syncPM();
+const SBF={sd_tog:()=>{const d=S.b.dataset,a=S.sd[d.f];S.sd[d.f]=a.includes(d.id)?a.filter(x=>x!=d.id):[...a,d.id];if(d.f=="sup")S.sd.crit=S.sd.crit.filter(x=>S.sd.sup.includes(x));S.sm=""},
+sd_new:()=>{S.sd=blank();S.si=-1;S.sm=""},
+sd_save:()=>{const er=vcheck(S.sd);if(er.length)return S.sm="Fix before saving: "+er.join(" ");if(S.si<0&&P.scn.length>=30)return S.sm="Limit of 30 scenarios. Delete one first.";
+const c=clean(S.sd);if(S.si>=0)P.scn[S.si]=c;else P.scn.push(c);save();syncPM();S.sd=blank();S.si=-1;S.sm="Saved. Find it in Strike package or press Play."},
+sd_edit:()=>{S.si=+S.b.dataset.i;S.sd=JSON.parse(JSON.stringify(P.scn[S.si]));S.sm="Editing. Press Save to update."},
+sd_dup:()=>{if(P.scn.length>=30)return S.sm="Limit of 30 scenarios.";const c=JSON.parse(JSON.stringify(P.scn[+S.b.dataset.i]));c.t=(c.t+" (copy)").slice(0,60);P.scn.push(c);save();syncPM();S.sm="Duplicated."},
+sd_del:()=>{const i=+S.b.dataset.i;if(!confirm("Delete \u201c"+P.scn[i].t+"\u201d?"))return;P.scn.splice(i,1);save();syncPM();S.si=-1;S.sm="Deleted."},
+sd_play:()=>{clearInterval(window.T);FP=newFP(BASEN+ +S.b.dataset.i);S.view="pkg"},
+sd_export:()=>{S.sx=JSON.stringify(P.scn,null,1);S.sm=P.scn.length?"Copy the text below to share it.":"Nothing to export yet."},
+sd_import:()=>{const t=document.getElementById("sx").value;let n=0,bad=0;try{let a=JSON.parse(t);if(!Array.isArray(a))a=[a];a.slice(0,30).forEach(o=>{const c=clean(o);if(!vcheck(c).length&&P.scn.length<30){P.scn.push(c);n++}else bad++});save();syncPM();S.sm=n+" imported, "+bad+" skipped as invalid."}catch(e){S.sm="That text is not valid scenario data."}S.sx=""}};
+V.scn=()=>{const d=S.sd,er=vcheck(d),grp=(f,keys,lab)=>keys.map(k=>`<button data-act="sd_tog" data-f="${f}" data-id="${k}" aria-pressed="${d[f].includes(k)}" class="${d[f].includes(k)?"on":""}">${esc(lab(k))}</button>`).join("");
+const acs=A.filter(a=>["Fighters","Bombers"].includes(a.cat)).map(a=>a.id);
+return `<div class="card"><h2>Scenario Builder</h2><p class="warn">Fictional scenarios only. Do not enter real targets, real locations or restricted exercise content.</p>
+${S.sm?`<div class="ev ${S.sm.startsWith("Fix")?"":"tip"}" role="alert">${esc(S.sm)}</div>`:""}
+<label>Mission title<br><input data-chg="sd_t" value="${esc(d.t)}" maxlength="60" style="width:100%;font:inherit;padding:8px;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:6px"></label>
+<p><label>Brief<br><textarea data-chg="sd_b" rows="3" maxlength="400" style="width:100%;font:inherit;padding:8px;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:6px">${esc(d.b)}</textarea></label></p>
+<p><label>Correct desired effect <select data-chg="sd_e">${EF.map(x=>`<option${x[0]==d.e?" selected":""}>${x[0]}</option>`).join("")}</select></label></p>
+<h3>Suitable weapons</h3><div class="row">${grp("good",Object.keys(W).filter(k=>!/^bsu/.test(k)),k=>W[k].n)}</div>
+<h3>Best-suited aircraft</h3><div class="row">${grp("best",acs,k=>byId[k].name)}</div>
+<h3>Threats that apply</h3><div class="row">${grp("thr",TK,k=>THR[k])}</div>
+<h3>Required support</h3><div class="row">${grp("sup",Object.keys(SUP),k=>SUP[k][0])}</div>
+<h3>Critical support <span class="mut">(mission aborts if missing)</span></h3><div class="row">${d.sup.length?grp("crit",d.sup,k=>SUP[k][0]):`<span class="mut">Choose required support first.</span>`}</div>
+${er.length?`<ul class="warn">${er.map(x=>`<li>${x}</li>`).join("")}</ul>`:`<p class="ok">Ready to save.</p>`}
+<div class="row"><button class="on" data-act="sd_save">${S.si>=0?"Save changes":"Save scenario"}</button><button data-act="sd_new">${S.si>=0?"Cancel edit":"Clear form"}</button></div></div>
+<h3>Saved scenarios (${P.scn.length})</h3>${P.scn.length?P.scn.map((s,i)=>`<div class="card" style="margin-bottom:8px"><b>${esc(s.t)}</b> <span class="tag">${s.e}</span><p>${esc(s.b)}</p><div class="row"><button class="on" data-act="sd_play" data-i="${i}">Play</button><button data-act="sd_edit" data-i="${i}">Edit</button><button data-act="sd_dup" data-i="${i}">Duplicate</button><button data-act="sd_del" data-i="${i}">Delete</button></div></div>`).join(""):`<p class="mut">None yet. Build one above.</p>`}
+<div class="card"><h3>Share</h3><div class="row"><button data-act="sd_export">Export all</button><button data-act="sd_import">Import pasted text</button></div><textarea id="sx" rows="5" aria-label="Scenario data" style="width:100%;font:inherit;padding:8px;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:6px">${esc(S.sx)}</textarea></div>`};
+/* ---------- FORCE REQUEST (knowledge-based planning) ---------- */
+const PUB={c5:281001,c17:170900,c130:44000,kc46:65000},PLAN={};Object.keys(PUB).forEach(k=>PLAN[k]=Math.round(PUB[k]*.7));
+const PAT={c17:6,c130:2,kc46:2};
+const FAC=[["c5","transport"],["c17","transport"],["c130","transport"],["kc46","tanker"],["kc135","tanker"],["e3","awacs"],["e7","awacs"],["f15c","fighter"],["f16","fighter"],["f22","fighter"],["mq9","drone"],["rc135","transport"],["hh60","helo"],["cv22","tilt"],["b52","bomber"]];
+const KIND=Object.fromEntries(FAC);
+function plane(k,w){const f='fill="var(--acc)"';const m={
+fighter:`<path ${f} d="M4 25 L58 22 L76 6 L84 6 L76 22 L92 20 L97 25 L92 30 L76 28 L84 44 L76 44 L58 28Z"/>`,
+bomber:`<path ${f} d="M4 25 L44 20 L96 4 L96 12 L62 25 L96 38 L96 46 L44 30Z"/>`,
+transport:`<rect ${f} x="6" y="22" width="86" height="6" rx="3"/><path ${f} d="M36 25 L48 4 L58 4 L54 25 L58 46 L48 46Z"/><path ${f} d="M82 25 L90 12 L95 12 L93 25 L95 38 L90 38Z"/>`,
+tanker:`<rect ${f} x="6" y="22" width="86" height="6" rx="3"/><path ${f} d="M36 25 L48 4 L58 4 L54 25 L58 46 L48 46Z"/><path ${f} d="M82 25 L90 12 L95 12 L93 25 L95 38 L90 38Z"/><rect x="92" y="24" width="7" height="2" ${f}/>`,
+awacs:`<rect ${f} x="6" y="22" width="86" height="6" rx="3"/><path ${f} d="M36 25 L48 4 L58 4 L54 25 L58 46 L48 46Z"/><path ${f} d="M82 25 L90 12 L95 12 L93 25 L95 38 L90 38Z"/><circle cx="48" cy="25" r="9" fill="none" stroke="var(--acc)" stroke-width="3"/>`,
+drone:`<rect ${f} x="14" y="23" width="70" height="4" rx="2"/><path ${f} d="M44 25 L50 2 L54 2 L52 25 L54 48 L50 48Z"/><path ${f} d="M80 25 L88 16 L90 16 L88 25 L90 34 L88 34Z"/>`,
+helo:`<rect ${f} x="22" y="20" width="56" height="10" rx="5"/><rect ${f} x="74" y="23" width="22" height="4"/><circle cx="46" cy="25" r="22" fill="none" stroke="var(--acc)" stroke-width="2" stroke-dasharray="4 3"/>`,
+tilt:`<rect ${f} x="14" y="22" width="76" height="6" rx="3"/><rect ${f} x="44" y="24" width="6" height="2"/><circle cx="46" cy="9" r="8" fill="none" stroke="var(--acc)" stroke-width="2"/><circle cx="46" cy="41" r="8" fill="none" stroke="var(--acc)" stroke-width="2"/><rect ${f} x="44" y="9" width="4" height="32"/>`}[k]||"";
+return `<svg viewBox="0 0 100 50" width="${w||96}" aria-hidden="true">${m}</svg>`}
+const MED={surg:["Surgical kits","4,500",4500,0,"Instruments and supplies for operating rooms."],iv:["IV fluid pallets","6,000",6000,0,"Fluids for treating shock and dehydration. Heavy."],abx:["Antibiotic and medicine pallets","3,500",3500,0,"Treat infection after injuries and flooding."],blood:["Blood products (cold chain)","2,500",2500,0,"Needs refrigeration, so delivery speed matters."],hosp:["Field hospital module","28,000",28000,1,"Oversized. Only C-5M or C-17 can carry it in this game."]};
+const FS=[{t:"Kestrel typhoon: contested relief",b:"A typhoon has devastated the fictional island of Kestrel. Deliver a field hospital and medical supplies, and evacuate 8 patients on return flights. Hostile fighters have been reported in the region, so the airlift needs protection.",af:"Kestrel Field accepts the C-17 and C-130 only. It is too short for the C-5M, and tankers do not land there.",ok:["c17","c130","cv22","hh60"],cap:10,inv:{c5:1,c17:3,c130:4,kc46:1,kc135:2,e3:1,e7:1,f15c:4,f16:4,f22:2,mq9:2,rc135:1,hh60:2,cv22:2,b52:2},need:{surg:4,iv:6,abx:4,blood:2,hosp:2},max:{surg:8,iv:12,abx:8,blood:4,hosp:3},pat:8,threat:1,use:["c17","c130","kc46","kc135","e3","e7","f15c","f16","f22","mq9","rc135","hh60","cv22"]},
+{t:"Marlin Strip: permissive relief",b:"Flooding has cut off the fictional town of Marlin. Deliver medical supplies and evacuate 8 patients. No threats are reported. The strip is short and rough.",af:"Marlin Strip accepts the C-130 only.",ok:["c130","cv22","hh60"],cap:8,inv:{c5:1,c17:3,c130:5,kc46:1,kc135:2,e3:1,e7:1,f15c:4,f16:4,f22:2,mq9:2,rc135:1,hh60:2,cv22:2,b52:2},need:{surg:6,iv:8,abx:6,blood:3,hosp:0},max:{surg:10,iv:12,abx:10,blood:5,hosp:0},pat:8,threat:0,use:["c130"]}];
+const newFR=s=>({s,qty:{},cargo:{},load:{},info:null,res:null,msg:""});
+let FR=newFR(0);
+const AAW=["aim120","aim9"],FT=["f15c","f16","f22"],LIFT=["c5","c17","c130","kc46"];
+const nq=id=>FR.qty[id]||0,tot=()=>Object.values(FR.qty).reduce((a,b)=>a+b,0);
+function frEval(){const s=FS[FR.s],land=id=>s.ok.includes(id),lines=[];
+const wasted=LIFT.filter(id=>nq(id)&&!land(id)),cap=LIFT.filter(land).reduce((t,id)=>t+nq(id)*(PLAN[id]),0),ovCap=["c5","c17"].filter(land).reduce((t,id)=>t+nq(id)*PLAN[id],0);
+const ks=Object.keys(MED),w=k=>MED[k][2],reqW=ks.reduce((t,k)=>t+(FR.cargo[k]||0)*w(k),0),needW=ks.reduce((t,k)=>t+(s.need[k]||0)*w(k),0),ovW=ks.filter(k=>MED[k][3]).reduce((t,k)=>t+(FR.cargo[k]||0)*w(k),0);
+const short=ks.filter(k=>(FR.cargo[k]||0)<(s.need[k]||0)),usedW=ks.reduce((t,k)=>t+Math.min(FR.cargo[k]||0,s.need[k]||0)*w(k),0);
+let cs=30*Math.min(1,usedW/needW)*Math.min(1,cap/Math.max(1,reqW));const ovBad=ovW>0&&ovCap<ovW;if(ovBad)cs*=.5;
+const patCap=LIFT.filter(land).reduce((t,id)=>t+nq(id)*(PAT[id]||0),0),ps=10*Math.min(1,patCap/s.pat),as=wasted.length?0:15;
+const aa=FT.reduce((t,id)=>t+(AAW.includes(FR.load[id])&&W[FR.load[id]].ac.includes(id)?nq(id):0),0),c2=nq("e3")+nq("e7"),tk=nq("kc46")+nq("kc135"),fighters=FT.reduce((t,id)=>t+nq(id),0);
+let ts;if(s.threat)ts=(aa>=2?10:aa?4:0)+(c2?8:0)+(tk||!fighters?7:0);else ts=fighters||nq("b52")?10:25;
+const isr=nq("mq9")+nq("rc135"),rs=nq("hh60")+nq("cv22");let ss=s.threat?(isr?5:0)+(rs?5:0):10;
+const unn=Object.keys(FR.qty).filter(id=>nq(id)&&!s.use.includes(id)),exW=Math.max(0,reqW-needW-ks.reduce((t,k)=>t+Math.max(0,(FR.cargo[k]||0)-(s.need[k]||0))*0,0));
+const es=Math.max(0,10-3*unn.length-Math.floor(exW/10000));
+const sc=Math.round(cs+ps+as+ts+ss+es);
+const r=sc>=80?["MISSION COMPLETE","ok"]:sc>=55?["PARTIAL SUCCESS","warn"]:["MISSION NOT ACCOMPLISHED","bad"];
+return{s,sc,r,cs:Math.round(cs),ps:Math.round(ps),as,ts,ss,es,wasted,cap,reqW,needW,short,ovBad,ovW,ovCap,patCap,aa,c2,tk,fighters,isr,rs,unn,exW}}
+const frStep=(k,id,v)=>`<span class="row" style="display:inline-flex;margin:0"><button data-act="${k}" data-id="${id}" data-d="-1" aria-label="Fewer ${esc(v)}">\u2212</button><b style="min-width:2ch;text-align:center">${k=="fr_q"?nq(id):FR.cargo[id]||0}</b><button data-act="${k}" data-id="${id}" data-d="1" aria-label="More ${esc(v)}">+</button></span>`;
+const FRF={fr_q:()=>{const d=S.b.dataset,s=FS[FR.s],v=nq(d.id)+ +d.d;FR.msg="";FR.res=null;if(v<0)return;if(v>(s.inv[d.id]||0))return FR.msg="Only "+s.inv[d.id]+" "+acName(d.id)+" available.";if(d.d>0&&tot()>=s.cap)return FR.msg="Request limit reached: "+s.cap+" aircraft maximum.";FR.qty[d.id]=v;if(!v)delete FR.qty[d.id]},
+fr_c:()=>{const d=S.b.dataset,s=FS[FR.s],v=(FR.cargo[d.id]||0)+ +d.d;FR.msg="";FR.res=null;if(v<0)return;if(v>s.max[d.id])return FR.msg="Limit: you may request at most "+s.max[d.id]+" of "+MED[d.id][0]+".";FR.cargo[d.id]=v},
+fr_info:()=>FR.info=FR.info==S.b.dataset.id?null:S.b.dataset.id,
+fr_go:()=>{const bad=FT.filter(id=>nq(id)&&(!FR.load[id]||!W[FR.load[id]].ac.includes(id)));if(!tot())return FR.msg="Request at least one aircraft.";if(bad.length)return FR.msg="Choose a compatible weapon for: "+bad.map(acName).join(", ")+".";FR.msg="";FR.res=frEval()},
+fr_reset:()=>{FR=newFR(FR.s)}};
+V.fr=()=>{const s=FS[FR.s],r=FR.res,I=FR.info;
+let h=`<div class="row"><label>Scenario <select data-chg="frs">${FS.map((x,i)=>`<option value="${i}"${i==FR.s?" selected":""}>${esc(x.t)}</option>`).join("")}</select></label></div>
+<div class="card"><h2>${esc(s.t)}</h2><p>${esc(s.b)}</p><p><b>Airfield:</b> ${esc(s.af)}</p><p class="warn"><b>Your job:</b> decide what to request. You may request up to <b>${s.cap} aircraft</b> and the supply amounts below. Use the Info buttons to learn each aircraft before you choose.</p>
+<p class="mut">Planning rule: aircraft carry 70% of their published maximum payload. Cargo weights and patient capacities are fictional game rules. Published maximums: C-5M 281,001 lb; C-17 170,900 lb; C-130J-30 44,000 lb; KC-46A 65,000 lb.</p></div>
+${FR.msg?`<div class="ev" role="alert">${esc(FR.msg)}</div>`:""}
+<h3>Medical supplies <span class="mut">(need / most you may request)</span></h3><div class="grid">${Object.keys(MED).filter(k=>s.max[k]).map(k=>`<div class="card"><b>${MED[k][0]}</b><p class="mut">${MED[k][4]}</p><p>${MED[k][1]} lb each \u00b7 need ${s.need[k]} \u00b7 limit ${s.max[k]}</p>${frStep("fr_c",k,MED[k][0])}</div>`).join("")}</div>
+<h3>Aircraft <span class="mut">(${tot()}/${s.cap} requested)</span></h3>`;
+h+=FAC.map(([id,kind])=>{const a=byId[id],pay=PLAN[id];return `<div class="card" style="margin-bottom:8px"><div class="row">${plane(kind,100)}<div style="flex:1;min-width:180px"><b>${esc(a.name)}</b> <span class="tag">${a.cat}</span><br><span class="mut">${esc(a.job)}${pay?" \u00b7 plans "+lb(pay):""}${PAT[id]?" \u00b7 "+PAT[id]+" patients":""} \u00b7 available ${s.inv[id]}</span></div>${frStep("fr_q",id,a.name)}<button data-act="fr_info" data-id="${id}" aria-expanded="${I==id}">Info</button></div>
+${FT.includes(id)&&nq(id)?`<label>Weapon <select data-chg="frl:${id}"><option value="">Choose\u2026</option>${Object.values(W).filter(x=>!/^bsu/.test(x.id)).map(x=>`<option value="${x.id}"${FR.load[id]==x.id?" selected":""}>${x.n}${x.ac.includes(id)?"":" (not listed for this aircraft)"}</option>`).join("")}</select></label>${FR.load[id]?loadout(id,W[FR.load[id]].ac.includes(id)?[FR.load[id]]:[]):""}`:""}
+${I==id?`<div class="ev tip"><p><b>${esc(a.job)}.</b> ${esc(a.easy)}</p><p class="ok">Good at: ${esc(a.pro)}</p><p class="bad">Limits: ${esc(a.con)}</p><p>Needs: ${esc(a.sup)}</p>${PUB[id]?`<p>Published max payload: ${lb(PUB[id])}. Planning payload here: ${lb(PLAN[id])}.</p>`:""}${Object.values(W).some(x=>x.ac.includes(id))?`<p>Weapons listed for it: ${Object.values(W).filter(x=>x.ac.includes(id)).map(x=>x.n).join(", ")}</p>`:""}</div>`:""}</div>`}).join("");
+h+=`<div class="row"><button class="on" data-act="fr_go">Submit request</button><button data-act="fr_reset">Reset</button></div>`;
+if(r){h+=`<div class="card"><h2 class="${r.r[1]}">${r.r[0]} \u00b7 ${r.sc}%</h2><h3>After-action debrief</h3><ul>
+<li class="${r.cs>=27?"ok":"bad"}">Supplies (${r.cs}/30): you requested ${lb(r.reqW)} against a need of ${lb(r.needW)}, and your landable airlift can carry ${lb(r.cap)}. ${r.short.length?"Short on: "+r.short.map(k=>MED[k][0]).join(", ")+". ":""}${r.cap<r.reqW?"You asked for more than your aircraft can carry. ":""}${r.ovBad?"The oversized field hospital needs a C-17 or C-5M that can land. ":""}</li>
+<li class="${r.ps>=9?"ok":"bad"}">Patients (${r.ps}/10): return flights can carry ${r.patCap} of ${r.s.pat}.</li>
+<li class="${r.as?"ok":"bad"}">Airfield (${r.as}/15): ${r.wasted.length?r.wasted.map(acName).join(", ")+" cannot land at this airfield. Those flights are wasted. "+r.s.af:"Everything you sent can use the airfield."}</li>
+<li class="${r.ts>=(r.s.threat?24:25)?"ok":"bad"}">${r.s.threat?`Protection (${r.ts}/25): ${r.aa} fighters with air-to-air missiles (need 2), ${r.c2?"command and control present":"no E-3 or E-7 for the air picture"}, ${r.tk||!r.fighters?"refueling covered":"fighters have no tanker"}.`:`Threat level (${r.ts}/25): no threat was reported, so fighters and bombers add little here.`}</li>
+${r.s.threat?`<li class="${r.ss==10?"ok":"warn"}">Support (${r.ss}/10): ${r.isr?"ISR present":"no ISR to watch the area"}; ${r.rs?"rescue force on call":"no rescue force for a downed crew"}.</li>`:""}
+<li class="${r.es>=8?"ok":"warn"}">Efficiency (${r.es}/10): ${r.unn.length?"Not needed here: "+r.unn.map(acName).join(", ")+". ":""}${r.exW>=10000?"You requested about "+lb(r.exW)+" more cargo than needed. ":""}${!r.unn.length&&r.exW<10000?"Lean and sufficient.":""}</li></ul>
+<p class="mut">Lesson: the best aircraft depends on cargo size, airfield limits, threats and available support, not on whichever carries the most. Fictional scenario for training.</p><div class="row"><button class="on" data-act="fr_reset">Try again</button></div></div>`}
+return h};
+const TABS=[["cmd","Command"],["fr","Force request"],["pkg","Strike package"],["scn","Scenario builder"],["wpn","Weapons"],["hangar","Library"],["quiz","Quiz"],["build","Force package"],["logi","Logistics"],["settings","Settings"]];
+function draw(){apply();
+$("#nav").innerHTML=TABS.map(t=>`<button data-v="${t[0]}" class="${S.view==t[0]?"on":""}" ${S.view==t[0]?'aria-current="page"':""}>${t[1]}</button>`).join("");
+const y=scrollY;$("#app").innerHTML=V[S.view]();
+if(S.focus){const el=document.getElementById(S.focus);S.focus=null;if(el){el.scrollIntoView({behavior:P.rm?"auto":"smooth"});el.focus({preventScroll:true})}}else scrollTo(0,y);
+setTimeout(hydrateImages,0);
+if(S.anim){S.anim=0;const p=$("#pl");if(p)requestAnimationFrame(()=>requestAnimationFrame(()=>p.style.transform=P.rm?"translateX(340px)":"translateX(340px)"))}}
+
+/* --------- VISUAL AIRCRAFT HANGAR EXPANSION --------- */
+const ADDITIONAL_ASSETS=[
+["f15ex","F-15EX Eagle II","Fighters","Modern multirole fighter","Updated Eagle with advanced electronics and weapons capacity.","fighter","Modern avionics and large payload.","Not low-observable; needs support.","Fuel, maintenance, C2"],
+["ac130","AC-130 Gunship","Fighters","Close air support and armed reconnaissance","A flying gunship supporting forces on the ground.","fighter","Sustained supporting fire.","Large aircraft vulnerable to strong air defenses.","C2, ground coordination"],
+["cca","CCA Collaborative Combat Aircraft","Fighters","Uncrewed collaborative combat","Uncrewed teammate designed to work with crewed aircraft.","fighter","Adds uncrewed capability.","Developing system; mission details not all public.","C2, autonomy, maintenance"],
+["rc135u","RC-135U Combat Sent","ISR","Electronic emitter intelligence","Studies technical characteristics of electronic signals.","isr","Specialized collection.","Specialized and limited inventory.","Analysts, communications"],
+["rq4","RQ-4 Global Hawk","ISR","High altitude long endurance reconnaissance","Long-distance uncrewed surveillance aircraft.","isr","Long-duration observation.","Needs ground support; not a strike platform.","Ground station, analysts"],
+["rq170","RQ-170 Sentinel","ISR","Low observable reconnaissance","Stealthy uncrewed spy aircraft.","isr","Low-observable intelligence collection.","Public details limited.","Control station, intelligence analysts"],
+["e8","E-8C Joint STARS","Command & control","Historical ground moving target surveillance","Tracked moving targets on the ground.","c2","Wide-area ground picture.","Retired from USAF service.","Maintenance, C2"],
+["kc10","KC-10 Extender","Mobility","Historical tanker and transport","Former large tanker and cargo aircraft.","tanker airlift","Combined tanker and cargo role.","Retired from USAF service.","Fuel, airfield"],
+["mc130","MC-130J Commando II","Mobility","Special operations support","Specialized transport and support for special operations.","airlift","Tailored for special missions.","Limited cargo and specialized support needs.","Specialized crews, fuel"],
+["dmsp","DMSP Weather Satellites","Space","Weather observation","Weather from space for mission planning.","space","Space weather observations.","Legacy system with aging spacecraft.","Ground processing"],
+["wgs","WGS Satellite Communications","Space","Wideband communications","Carries large volumes of military communications data.","comms","High-capacity connectivity.","Needs compatible ground terminals.","Network terminals"],
+["minuteman","LGM-30G Minuteman III","Strategic","Land-based strategic deterrence","Land-based nuclear deterrent, not a classroom tactical weapon.","space","Strategic deterrence capability.","Fixed land-based system.","Protected command and control"]
+];
+for(const row of ADDITIONAL_ASSETS){if(byId[row[0]])continue;const a={id:row[0],name:row[1],cat:row[2],job:row[3],easy:row[4],tags:row[5].split(' '),pro:row[6],con:row[7],sup:row[8]};A.push(a);byId[a.id]=a;if(!CATS.includes(a.cat))CATS.push(a.cat)}
+const WIKI_PAGES={f16:'General Dynamics F-16 Fighting Falcon',f15c:'McDonnell Douglas F-15 Eagle',f15e:'McDonnell Douglas F-15E Strike Eagle',f15ex:'Boeing F-15EX Eagle II',f22:'Lockheed Martin F-22 Raptor',f35:'Lockheed Martin F-35 Lightning II',a10:'Fairchild Republic A-10 Thunderbolt II',ac130:'Lockheed AC-130',mq9:'General Atomics MQ-9 Reaper',u2:'Lockheed U-2',rc135:'Boeing RC-135',rc135s:'Boeing RC-135',rc135u:'Boeing RC-135',rq4:'Northrop Grumman RQ-4 Global Hawk',rq170:'Lockheed Martin RQ-170 Sentinel',e3:'Boeing E-3 Sentry',e7:'Boeing E-7 Wedgetail',e8:'Northrop Grumman E-8 Joint STARS',b52:'Boeing B-52 Stratofortress',b1:'Rockwell B-1 Lancer',b2:'Northrop Grumman B-2 Spirit',b21:'Northrop Grumman B-21 Raider',cca:'Collaborative combat aircraft',c5:'Lockheed C-5 Galaxy',c17:'Boeing C-17 Globemaster III',c130:'Lockheed Martin C-130J Super Hercules',kc135:'Boeing KC-135 Stratotanker',kc46:'Boeing KC-46 Pegasus',kc10:'McDonnell Douglas KC-10 Extender',hh60:'Sikorsky HH-60 Pave Hawk',cv22:'Bell Boeing V-22 Osprey',mc130:'Lockheed MC-130',gps:'Global Positioning System',sbirs:'Space-Based Infrared System',aehf:'Advanced Extremely High Frequency',l16:'Link 16',dmsp:'Defense Meteorological Satellite Program',wgs:'Wideband Global SATCOM',minuteman:'LGM-30 Minuteman'};
+const imageMemory={};
+function photo(id){return `<div class="photo-wrap" data-photo-id="${esc(id)}"><div class="photo-fallback"><span class="silhouette" aria-hidden="true">${byId[id]?.cat==='Space'?'🛰️':byId[id]?.cat==='Strategic'?'🚀':'✈'}</span><small>Aircraft photo loading / image unavailable</small></div><img class="aircraft-photo" alt="${esc(byId[id]?.name||id)} reference photograph" loading="lazy" hidden><span class="photo-credit">Wikipedia / Wikimedia Commons</span></div>`}
+function hydrateImages(){const nodes=[...document.querySelectorAll('[data-photo-id]')];for(const box of nodes){if(box.dataset.hydrated)return;box.dataset.hydrated='1';const id=box.dataset.photoId,im=box.querySelector('img');function set(url){if(!url)return;im.onload=()=>{im.hidden=false;box.classList.add('has-image')};im.onerror=()=>{im.hidden=true;box.classList.remove('has-image')};im.src=url}if(imageMemory[id]!==undefined){set(imageMemory[id]);continue}const page=WIKI_PAGES[id];if(!page){imageMemory[id]='';continue}const url='https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&pithumbsize=700&titles='+encodeURIComponent(page);fetch(url).then(r=>r.json()).then(d=>{const pages=Object.values(d.query?.pages||{}),src=pages[0]?.thumbnail?.source||'';imageMemory[id]=src;if(box.isConnected)set(src)}).catch(()=>{imageMemory[id]=''})}}
+const originalHangar=V.hangar;
+V.hangar=()=>{const list=A.filter(a=>S.cat==='All'||a.cat===S.cat);return `<section class="ac-hero"><div><span class="ac-role">INTERACTIVE FLIGHT LINE • AIR & SPACE 101</span><h2>Meet the aircraft. Master the mission.</h2><p>Explore real photographs, strengths, weaknesses and support needs. Open a briefing, listen to an explanation, compare aircraft, or jump into a scenario.</p><div class="row"><button class="on" data-v="pkg">⚡ Build a force package</button><button data-v="fr">📦 Plan a force request</button><button data-v="quiz">🎯 Test my knowledge</button></div></div><div class="ac-hero-art" aria-hidden="true">✈</div></section><div class="row"><label>Explore category <select data-chg="cat">${CATS.map(c=>`<option${c===S.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></label><button data-act="beg" class="${S.beg?'on':''}">Beginner mode ${S.beg?'ON':'OFF'}</button><span class="mut">${list.length} systems available • click a card to inspect</span></div>${S.cmp.length?cmpTable():''}<div class="aircraft-grid">${list.map(a=>`<article class="card aircraft-card">${photo(a.id)}<div class="ac-body"><span class="ac-role">${esc(a.cat)}</span><h3>${esc(a.name)}</h3><p>${esc(S.beg?a.easy:a.job)}</p><div class="pro-con"><div class="positive"><b class="ok">✓ PRO</b><br>${esc(a.pro)}</div><div class="negative"><b class="bad">⚠ CON</b><br>${esc(a.con)}</div></div><p class="mut"><b>Support:</b> ${esc(a.sup)}</p><div class="row ac-actions"><button class="on" data-act="showasset" data-id="${a.id}">🔎 Inspect</button><button data-act="cmp" data-id="${a.id}" class="${S.cmp.includes(a.id)?'on':''}">${S.cmp.includes(a.id)?'✓ Comparing':'⇄ Compare'}</button><button data-act="speakasset" data-id="${a.id}" aria-label="Read about ${esc(a.name)}">🔊</button></div></div></article>`).join('')}</div>`};
+const originalPkg=V.pkg;
+V.pkg=()=>{const h=originalPkg();const intro=`<section class="ac-hero"><div><span class="ac-role">OPERATIONS MISSION LAB</span><h2>Build. Brief. Execute. Debrief.</h2><p>Four steps from your Air & Space slides: desired effect → weapon & aircraft → threats → detached support. Every decision gets training feedback.</p></div><div class="ac-hero-art" aria-hidden="true">🎯</div></section>`;if(FP.step!==1)return intro+h;const ids=['f22','f35','f16','f15e','b1','b2','b52','a10'];const gal=`<section class="stage-panel"><h3>✈ Inspect your available training aircraft before choosing</h3><div class="mini-grid">${ids.map(id=>{const a=byId[id];return `<button data-act="fp_a" data-id="${id}" class="${FP.ac===id?'on':''}">${photo(id)}<b>${esc(a.name)}</b><br><span class="mut">${esc(a.job)}</span></button>`}).join('')}</div><p class="mut">Choose an aircraft here or in the list below, then choose a compatible weapon from the AFEX learning database. These are fictional training decisions, not real-world attack plans.</p></section>`;return intro+gal+h};
+const originalCmd=V.cmd;V.cmd=()=>`<section class="ac-hero"><div><span class="ac-role">LIVE TRAINING SIMULATOR</span><h2>Operation Harbor Relief</h2><p>Manage aircraft, runway repairs, fuel and medical evacuations. This is a turn-based logistics challenge with a real rules engine—not a decorative arrow animation.</p><div class="row"><button data-v="hangar">✈ Aircraft hangar</button><button data-v="pkg" class="on">🎮 Force package lab</button></div></div><div class="ac-hero-art" aria-hidden="true">🛫</div></section>`+originalCmd();
+function modalAsset(id){const a=byId[id];if(!a)return;document.getElementById('assetModal')?.remove();const el=document.createElement('div');el.id='assetModal';el.className='glass-modal';el.innerHTML=`<div class="modal-panel" role="dialog" aria-modal="true" aria-label="${esc(a.name)} aircraft details"><div class="modal-head"><span class="ac-role">AIRCRAFT INTELLIGENCE CARD</span><button data-close-modal="1" aria-label="Close panel">✕ Close</button></div><h2>${esc(a.name)}</h2>${photo(a.id)}<span class="tag">${esc(a.cat)}</span><span class="tag">${esc(a.job)}</span><h3>What does it do?</h3><p>${esc(a.easy)}</p><div class="pro-con"><div class="positive"><h3 class="ok">✓ Advantages</h3>${esc(a.pro)}</div><div class="negative"><h3 class="bad">⚠ Limitations</h3>${esc(a.con)}</div></div><h3>Required support</h3><p>${esc(a.sup)}</p><div class="row"><button class="on" data-read-modal="${esc(id)}">🔊 Explain it to me</button><button data-close-modal="1">Back to hangar</button></div><p class="mut">Aircraft photography supplied by Wikipedia/Wikimedia when available; published capabilities are general educational summaries. For AFEX and OPS use each exercise's authorized asset list.</p></div>`;document.body.append(el);hydrateImages();el.querySelector('[data-close-modal]')?.focus()}
+function showToast(message){let area=document.getElementById('toastArea');if(!area){area=document.createElement('div');area.id='toastArea';area.className='toast-area';area.setAttribute('aria-live','polite');document.body.append(area)}const t=document.createElement('div');t.className='game-toast';t.textContent=message;area.append(t);setTimeout(()=>t.remove(),4400)}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act="showasset"],[data-act="speakasset"],[data-close-modal],[data-read-modal]');if(!el)return;if(el.dataset.closeModal){document.getElementById('assetModal')?.remove();return}if(el.dataset.readModal){const a=byId[el.dataset.readModal];if(a)say(`${a.name}. ${a.easy} Advantage: ${a.pro} Limitation: ${a.con} Support: ${a.sup}`);return}const a=byId[el.dataset.id];if(!a)return;if(el.dataset.act==='showasset')modalAsset(a.id);if(el.dataset.act==='speakasset'){say(`${a.name}. ${a.easy} Pro: ${a.pro} Con: ${a.con}`);showToast('🔊 Reading '+a.name+' aloud')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('assetModal')?.remove()});
+S.view='hangar';
+
+draw();
+</script></body></html>
