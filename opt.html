@@ -97,6 +97,44 @@ button{transition:transform .16s,border-color .15s,background .15s}button:hover:
 .flight-detail button{margin-right:7px;margin-bottom:7px}.flight-hint{margin:8px 0;color:#b7cfdf;font-size:.89em}
 .flight-status{font-size:.82em;color:#bce9f2}
 @media(max-width:650px){.flight-stage{min-height:265px}.airbase-node{font-size:.7em;width:31%}.flight-token{width:56px;height:51px}.flight-token .jet{font-size:1.35rem}.flight-token small{font-size:.6rem}}
+
+/* Mission Arcade 2.0 — compact, rule-driven learning mini-campaign */
+.arcade-hero{background:radial-gradient(circle at 80% 25%,#235878,#101e35 62%);border:1px solid #41718c;border-radius:20px;padding:23px;margin-bottom:16px;overflow:hidden}
+.arcade-hero h2{font-size:clamp(2rem,5vw,3.4rem);margin:0}
+.arcade-sub{color:#bdd8e9}
+.arcade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px}
+.arcade-mission{border:1px solid #35627b;border-radius:17px;background:linear-gradient(155deg,#19354b,#0c1b2b);overflow:hidden;transition:.2s transform}
+.arcade-mission:hover{transform:translateY(-4px)}
+.arcade-mission .photo-wrap{height:145px}
+.arcade-mission section{padding:14px}
+.arcade-mission strong{font:700 1.6em 'Barlow Condensed',sans-serif}
+.arcade-hud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:15px 0}
+.arcade-hud div{border:1px solid #33536b;background:#102739;border-radius:12px;padding:10px}
+.arcade-hud small{color:#a8c3d7;display:block}
+.arcade-hud b{font:700 1.6em 'Barlow Condensed',sans-serif}
+.arcade-stage{background:radial-gradient(ellipse at 50% 35%,#1f5271,#0b2033 70%);height:210px;border:1px solid #426882;border-radius:15px;position:relative;overflow:hidden;margin:13px 0}
+.arcade-stage:before{content:'';position:absolute;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:32px 32px}
+.arcade-runway{position:absolute;left:8%;right:8%;bottom:34%;height:5px;border-top:3px dashed #8ecbe7a8;transform:rotate(-9deg)}
+.arcade-jet{position:absolute;top:35%;left:calc(9% + (var(--progress,0) * 0.72%));font-size:3.5rem;filter:drop-shadow(0 12px 9px #0009);transition:left .8s ease,transform .8s ease}
+.arcade-jet.working{animation:arcade-float 1.6s ease-in-out infinite alternate}
+@keyframes arcade-float{to{transform:translateY(-9px) rotate(5deg)}}
+.arcade-node{position:absolute;bottom:13%;font-weight:700;color:#cceafb;font-size:.85em}
+.arcade-node.end{right:5%}
+.arcade-choices{display:grid;gap:10px}
+.arcade-choice{display:block;width:100%;text-align:left;padding:14px;border:1px solid #42627c;border-radius:12px;background:#152c42}
+.arcade-choice strong{display:block;font-size:1.08em}
+.arcade-choice span{color:#b9cfdd;font-size:.9em}
+.arcade-choice:hover{background:#21445b}
+.arcade-choice:disabled{opacity:.72;cursor:default}
+.arcade-feedback{padding:14px;border:1px solid #537b8d;background:#15354c;border-radius:12px;margin:12px 0}
+.arcade-result{border:1px solid #53819a;border-radius:17px;padding:20px;background:linear-gradient(135deg,#153850,#0c1b2d)}
+.arcade-meter{height:10px;background:#293a4b;border-radius:12px;overflow:hidden}.arcade-meter span{display:block;height:100%;background:linear-gradient(90deg,#47d0e5,#9edaa4);transition:width .5s ease}
+.arcade-explainer{display:grid;grid-template-columns:120px 1fr;gap:13px;align-items:center;margin:10px 0}
+.arcade-explainer .photo-wrap{height:90px;border-radius:10px}
+.arcade-xp{font-weight:700;color:#f4dc80}
+@media(max-width:640px){.arcade-hud{grid-template-columns:repeat(2,1fr)}.arcade-explainer{grid-template-columns:1fr}.arcade-hero{padding:15px}}
+@media(prefers-reduced-motion:reduce){.arcade-jet{animation:none!important;transition:none!important}.arcade-mission{transition:none}}
+
 </style></head><body>
 <header><div class="radar" aria-hidden="true"></div><h1>Air &amp; Space Command Academy</h1>
 <p>Learn what each asset does, build a training force package, and load the cargo. All scenarios are fictional.</p></header>
@@ -572,10 +610,46 @@ document.addEventListener('click',e=>{
  }
 });
 
-S.view='hangar';
 
-/* opt.html launches directly into the existing, functional flight operations mission. */
-S.view="cmd";
+/* ---------- MISSION ARCADE: educational fictional logistics & decision simulation ---------- */
+const ARCADE=[
+{id:"relief",title:"Cyclone Rescue",tag:"Humanitarian",asset:"c17",time:4,brief:"A fictional coastal town needs emergency supplies. Plan a safe, efficient response.",stages:[
+{q:"Your first shipment is 95,000 lb of essential supplies. Which aircraft is the best fit?",opts:[["C-17: heavy lift with suitable destination access",30,0,"Correct for this fictional airfield and cargo requirement. The C-17 has adequate published capacity and flexibility."],["C-130J: one flight is enough",0,1,"The stated load exceeds the published C-130J-30 maximum payload; this would need multiple deliveries."],["B-52: use the largest aircraft",0,1,"A bomber is not an airlift aircraft. Choose an aircraft designed to carry supplies."]]},
+{q:"Weather closes the receiving airport for heavy aircraft. What should the team do?",opts:[["Reassess access and use permitted smaller-aircraft deliveries",30,0,"Good. Adapt the logistics plan rather than assuming the runway is usable."],["Continue with the original heavy-aircraft landing",0,1,"The receiving airport is closed to that aircraft type. Do not disregard the constraint."],["Send supplies without coordinating a receiving team",5,1,"Moving cargo is not enough: someone must receive and distribute it."]]},
+{q:"A medical team reports urgent patients. What is missing from your plan?",opts:[["Coordinate aeromedical evacuation and medical reception",40,0,"Exactly. Patient movement requires medical planning, transport capability and a receiving facility."],["Increase bombing capability",0,1,"This is a humanitarian mission; bombing does not solve the medical requirement."],["Ignore the patients until the next mission",0,1,"Medical needs are part of the mission's desired end state."]]}
+]},
+{id:"intel",title:"Eyes in the Sky",tag:"ISR",asset:"rq4",time:4,brief:"A commander needs persistent observation and a reliable intelligence report from a fictional region.",stages:[
+{q:"Which asset category should lead the collection task?",opts:[["RQ-4 long-endurance reconnaissance",30,0,"Good: long-endurance ISR is relevant to persistent observation."],["C-5 heavy cargo transport",0,1,"The C-5 is an airlifter, not the primary collection aircraft."],["KC-46 aerial refueling",5,1,"Refueling may support missions, but it does not independently deliver the requested ISR collection."]]},
+{q:"The commander cannot receive the collected information. Which capability is missing?",opts:[["Secure communications and intelligence dissemination",35,0,"Correct: an intelligence product has little value if it cannot reach the decision maker."],["Additional cargo pallets",0,1,"Cargo capacity does not solve an information-sharing failure."],["A larger bomber",0,1,"A bomber does not address the communications problem."]]},
+{q:"The information is incomplete due to weather. What is the best learning response?",opts:[["Explain collection limitations and coordinate complementary sources",35,0,"Right: communicate uncertainty and seek complementary collection rather than claim perfect coverage."],["Report the missing data as confirmed",0,1,"Never invent missing intelligence."],["Remove the communications support",0,1,"Removing communications makes the reporting problem worse."]]}
+]},
+{id:"airfield",title:"Open the Airbase",tag:"Expeditionary",asset:"c130",time:5,brief:"A fictional forward operating site must become usable before the next relief wave.",stages:[
+{q:"What should you verify before sending more aircraft?",opts:[["Airfield condition, receiving capacity and required support",30,0,"Correct: a usable landing location and support capabilities come first."],["Only the aircraft's appearance",0,1,"Aircraft selection without checking the destination is incomplete."],["Skip the receiving-site check",0,1,"A successful departure does not guarantee a safe arrival."]]},
+{q:"Power and communications go offline. What should the team prioritize?",opts:[["Restore essential base services and communications",35,0,"Correct: basic services and C2 enable the operating site to function."],["Add flights without checking support",5,1,"More flights can overwhelm an unsupported airfield."],["Mark every task complete",0,1,"Tasks must be completed and validated, not simply labeled complete."]]},
+{q:"Supplies arrive but no one can unload them. What was missing?",opts:[["Cargo handling personnel and equipment",35,0,"Right: the plan needs ground handling and onward distribution."],["A bigger radar",0,1,"Radar does not unload cargo."],["A new fighter aircraft",0,1,"Fighter aircraft are not cargo-handling equipment."]]}
+]},
+{id:"recovery",title:"Bring Them Home",tag:"Personnel Recovery",asset:"hh60",time:4,brief:"A fictional aircrew is isolated. Your mission is to organize a safe recovery and medical reception.",stages:[
+{q:"Which capability is directly associated with personnel recovery?",opts:[["HH-60 rescue capability and recovery personnel",30,0,"Correct: personnel recovery requires an appropriate rescue capability and trained teams."],["C-5 oversized cargo delivery",0,1,"The C-5 is not a replacement for a rescue force."],["B-21 strategic bomber",0,1,"A strategic bomber is not a direct extraction platform."]]},
+{q:"The recovery team loses communication with its coordination center. What matters?",opts:[["Re-establish coordination and account for the communications limitation",35,0,"Good: safe personnel recovery depends on command coordination and reliable communication."],["Assume everyone has the same information",0,1,"Unconfirmed information should not be treated as shared."],["Delete the personnel status record",0,1,"Personnel accountability is central to a recovery mission."]]},
+{q:"The team returns with an injured survivor. What should already be arranged?",opts:[["Medical reception, treatment and personnel accountability",35,0,"Correct: recovery includes safe return and necessary medical care."],["Only a mission success animation",0,1,"An animation does not substitute for completed medical and accountability tasks."],["Another aircraft without a defined role",5,1,"Unassigned assets do not necessarily help the objective."]]}
+]}];
+const ACD={mission:null,i:0,score:0,mistakes:0,selected:null,feedback:null,log:[],finished:false};
+let careerXP=0;try{careerXP=Number(localStorage.getItem("academy_arcade_xp")||0)}catch(e){}
+const arcadePct=()=>Math.round(ACD.i/3*100);
+const arcadeMission=()=>ARCADE.find(m=>m.id===ACD.mission);
+function arcadeStart(id){const m=ARCADE.find(x=>x.id===id);if(!m)return;Object.assign(ACD,{mission:id,i:0,score:0,mistakes:0,selected:null,feedback:null,log:[],finished:false});showToast('🎮 Mission started: '+m.title);draw()}
+function arcadeChoose(k){const m=arcadeMission(),step=m?.stages[ACD.i];if(!step||ACD.selected!==null)return;const o=step.opts[k];if(!o)return;ACD.selected=k;ACD.score+=o[1];ACD.mistakes+=o[2];ACD.feedback=o[3];ACD.log.push({q:step.q,choice:o[0],explanation:o[3],good:o[2]===0});if(o[2]===0)showToast('⭐ Great decision! +'+o[1]+' points');else showToast('📘 Learning moment: review the explanation');draw()}
+function arcadeNext(){const m=arcadeMission();if(!m||ACD.selected===null)return;ACD.i++;ACD.selected=null;ACD.feedback=null;if(ACD.i>=m.stages.length){ACD.finished=true;const reward=ACD.score>=70?Math.max(10,ACD.score):15;careerXP+=reward;try{localStorage.setItem("academy_arcade_xp",String(careerXP))}catch(e){}showToast('🏆 Debrief unlocked · +'+reward+' XP')}draw()}
+function arcadeView(){const m=arcadeMission();if(!m)return '<section class="arcade-hero"><span class="ac-role">🎮 MISSION ARCADE • AIR & SPACE ACADEMY</span><h2>Every choice changes the mission.</h2><p class="arcade-sub">Choose a scenario, study the aircraft, react to realistic classroom problems and earn XP. No meaningless arrows; each choice changes your mission grade and debrief.</p><div class="arcade-xp">⭐ '+careerXP+' career XP earned</div></section><div class="arcade-grid">'+ARCADE.map(x=>'<article class="arcade-mission">'+photo(x.asset)+'<section><span class="ac-role">'+esc(x.tag)+'</span><br><strong>'+esc(x.title)+'</strong><p>'+esc(x.brief)+'</p><div class="row"><button class="on" data-arcade-start="'+x.id+'">▶ Start mission</button><button data-arcade-learn="'+x.asset+'">✈ Aircraft card</button></div></section></article>').join('')+'</div>';
+const a=byId[m.asset];
+const hud='<div class="arcade-hud"><div><small>PHASE</small><b>'+Math.min(ACD.i+1,3)+'/3</b></div><div><small>SCORE</small><b>'+ACD.score+'/100</b></div><div><small>DECISIONS TO REVIEW</small><b>'+ACD.mistakes+'</b></div><div><small>CAREER XP</small><b>'+careerXP+'</b></div></div>';
+const stage='<div class="arcade-stage"><div class="arcade-runway"></div><div class="arcade-jet '+(!ACD.finished?'working':'')+'" style="--progress:'+Math.min(100,arcadePct()+(ACD.selected!==null?25:0))+'">✈️</div><div class="arcade-node" style="left:5%">🏠 BASE</div><div class="arcade-node end">🎯 OBJECTIVE</div></div>';
+if(ACD.finished){const label=ACD.score>=85?'🏆 MISSION ACCOMPLISHED':ACD.score>=55?'🟡 PARTIAL SUCCESS':'📘 TRAINING MISSION INCOMPLETE';return '<section class="arcade-hero"><span class="ac-role">AFTER ACTION REVIEW</span><h2>'+esc(m.title)+'</h2><p>'+esc(m.brief)+'</p></section>'+hud+stage+'<section class="arcade-result"><h2>'+label+' · '+ACD.score+'%</h2><p>'+ (ACD.score>=85?'Excellent: the key capabilities and support were correctly matched.':"Review the missed decisions, then replay to improve.")+'</p><h3>Decision-by-decision debrief</h3>'+ACD.log.map((x,i)=>'<div class="arcade-feedback"><b>'+(i+1)+'. '+esc(x.q)+'</b><p class="'+(x.good?'ok':'bad')+'">Your decision: '+esc(x.choice)+'</p><p>'+esc(x.explanation)+'</p></div>').join('')+'<div class="row"><button class="on" data-arcade-start="'+m.id+'">↻ Replay mission</button><button data-arcade-menu="1">🎮 More missions</button></div></section>'}
+const item=m.stages[ACD.i];return '<section class="arcade-hero"><span class="ac-role">LIVE TRAINING • '+esc(m.tag)+'</span><h2>'+esc(m.title)+'</h2><p class="arcade-sub">'+esc(m.brief)+'</p><button data-arcade-menu="1">← All missions</button></section>'+hud+stage+'<section class="card"><div class="arcade-explainer">'+photo(m.asset)+'<div><span class="ac-role">FEATURED AIRCRAFT</span><h3>'+esc(a.name)+'</h3><div class="pro-con"><div class="positive"><b class="ok">✓ Pro</b><br>'+esc(a.pro)+'</div><div class="negative"><b class="bad">⚠ Con</b><br>'+esc(a.con)+'</div></div><button data-arcade-learn="'+a.id+'">🔎 Full aircraft briefing</button></div></div><div class="arcade-meter"><span style="width:'+arcadePct()+'%"></span></div><h2>Decision '+(ACD.i+1)+': '+esc(item.q)+'</h2><div class="arcade-choices">'+item.opts.map((o,k)=>'<button class="arcade-choice" data-arcade-choice="'+k+'" '+(ACD.selected!==null?'disabled':'')+'><strong>'+String.fromCharCode(65+k)+'. '+esc(o[0])+'</strong><span>'+ (ACD.selected===k?'✓ Your selection':'Choose this option')+'</span></button>').join('')+'</div>'+(ACD.feedback!==null?'<div class="arcade-feedback" role="status"><h3>'+(ACD.mistakes&&item.opts[ACD.selected][2]?'📘 Learn from this':'⭐ Well planned!')+'</h3><p>'+esc(ACD.feedback)+'</p><button class="on" data-arcade-next="1">'+(ACD.i===2?'🏁 Finish and debrief':'Next decision →')+'</button></div>':'<p class="mut">Choose one answer to receive feedback. Your choices affect the final score.</p>')+'</section>'}
+V.arcade=arcadeView;TABS.unshift(["arcade","🎮 Mission Arcade"]);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-arcade-start],[data-arcade-menu],[data-arcade-choice],[data-arcade-next],[data-arcade-learn]");if(!b)return;if(b.hasAttribute("data-arcade-start")){S.view="arcade";arcadeStart(b.dataset.arcadeStart)}else if(b.hasAttribute("data-arcade-menu")){ACD.mission=null;S.view="arcade";draw()}else if(b.hasAttribute("data-arcade-choice"))arcadeChoose(+b.dataset.arcadeChoice);else if(b.hasAttribute("data-arcade-next"))arcadeNext();else if(b.hasAttribute("data-arcade-learn"))modalAsset(b.dataset.arcadeLearn)});
+
+S.view='cmd';
 newG(2026);
 draw();
 </script></body></html>
