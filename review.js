@@ -110,4 +110,5 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modalOpen)closeModal()});
 /* Keep review accessible from any game mode. */
 const floating=document.createElement("button");floating.className="review-float";floating.innerHTML="📥 Command Inbox"+(items.some(x=>x.issues.length)?'<span class="review-badge">!</span>':'');floating.setAttribute("aria-label","Open command review inbox");floating.addEventListener("click",()=>{closeModal();S.view="inbox";draw()});document.body.appendChild(floating);
+draw();
 })();
