@@ -1,0 +1,40 @@
+
+/* Air & Space Command Academy — Command Review System */
+.review-shell{background:linear-gradient(125deg,#102b40,#142137 55%,#0e1729);border:1px solid #4a7288;padding:20px;border-radius:19px;margin:14px 0;position:relative;overflow:hidden}
+.review-shell:before{content:"";position:absolute;right:-55px;top:-65px;width:190px;height:190px;background:radial-gradient(circle,#42d3ef22,transparent 70%);pointer-events:none}
+.review-head{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.review-head h2{margin:0}.review-pill{font-weight:700;font-size:.82em;letter-spacing:.08em;padding:5px 11px;border:1px solid #6a8fa6;border-radius:40px}
+.review-led{display:inline-block;width:13px;height:13px;border-radius:50%;background:#51d7a1;box-shadow:0 0 0 3px #51d7a126,0 0 13px #51d7a16c;vertical-align:middle;margin-right:7px}
+.review-led.red{background:#ff6767;box-shadow:0 0 0 4px #ff535327,0 0 16px #ff53538c}
+.review-led.amber{background:#f5c564;box-shadow:0 0 0 4px #f5c56423,0 0 15px #f5c56485}
+.review-alert{border:1px solid #ff7474;background:linear-gradient(120deg,#60262d,#371e2a);border-radius:14px;padding:15px;margin:12px 0;color:#fff0f0}
+.review-alert .review-led{animation:review-blink 1s ease-in-out infinite}
+@keyframes review-blink{50%{opacity:.25;box-shadow:0 0 0 1px #ff535327}}
+.review-okay{border:1px solid #55bf9a;background:linear-gradient(120deg,#123d3d,#122e35);border-radius:14px;padding:15px;margin:12px 0}
+.review-issues{margin:10px 0;padding-left:21px}.review-issues li{margin:5px 0}
+.review-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.review-primary{background:linear-gradient(130deg,#40d3e8,#7be2d6)!important;color:#08202b!important;border:0!important;font-weight:800}
+.review-secondary{background:#1d3952!important}
+.review-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.review-meta>div{border:1px solid #42647e;border-radius:10px;padding:8px 10px;background:#112638}
+.review-meta small{display:block;color:#b0cad9}.review-meta strong{font-size:1.05rem}
+.review-inbox{display:grid;grid-template-columns:minmax(210px,1fr) minmax(280px,1.7fr);gap:13px}
+.review-mail-list{max-height:560px;overflow:auto;border:1px solid #3c5a72;border-radius:12px;background:#132537}
+.review-mail{width:100%;text-align:left;border:0!important;border-bottom:1px solid #304a5b!important;border-radius:0!important;padding:13px!important;background:transparent!important}
+.review-mail.selected{background:#1c4860!important}
+.review-mail strong,.review-mail small{display:block}.review-mail small{color:#aac4d5}
+.review-detail{border:1px solid #40617a;border-radius:12px;padding:17px;background:#152b3d;min-height:230px}
+.review-stamp{font:800 1.25em 'Barlow Condensed',sans-serif;letter-spacing:.08em;padding:6px 11px;border:2px solid;border-radius:6px;display:inline-block;transform:rotate(-3deg);margin:8px 0}
+.review-stamp.approved{color:#71e0a6}.review-stamp.returned{color:#ff9d87}
+.review-overlay{position:fixed;inset:0;z-index:10000;background:#030b13d6;display:flex;align-items:center;justify-content:center;padding:15px;backdrop-filter:blur(5px)}
+.review-modal{width:min(640px,100%);max-height:90vh;overflow:auto;background:linear-gradient(135deg,#152e45,#101c2b);border:1px solid #578aa6;box-shadow:0 25px 100px #000a;border-radius:19px;padding:24px;animation:review-pop .24s ease}
+.review-modal h2{font-size:2rem;margin:8px 0}
+.review-modal .review-alert{margin-top:15px}
+@keyframes review-pop{from{transform:scale(.95) translateY(8px);opacity:.3}to{transform:scale(1);opacity:1}}
+.review-float{position:fixed;bottom:16px;right:16px;z-index:7000;box-shadow:0 9px 25px #000a;border:1px solid #73cce8!important;background:#123954!important;border-radius:99px!important;font-size:.88em}
+.review-badge{font-size:.78em;color:#fff;background:#bd3f4d;padding:2px 6px;border-radius:11px;margin-left:5px}
+.review-asset-images{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.review-asset-images .photo-wrap{width:118px;height:78px;border-radius:8px;overflow:hidden}
+.review-asset-images small{display:block;width:118px;font-size:.7em}
+@media(max-width:680px){.review-inbox{grid-template-columns:1fr}.review-modal{padding:17px}.review-float{right:8px;bottom:8px}.review-shell{padding:14px}}
+@media(prefers-reduced-motion:reduce){.review-alert .review-led,.review-modal{animation:none!important}}
