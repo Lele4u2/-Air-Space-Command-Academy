@@ -135,6 +135,28 @@ button{transition:transform .16s,border-color .15s,background .15s}button:hover:
 @media(max-width:640px){.arcade-hud{grid-template-columns:repeat(2,1fr)}.arcade-explainer{grid-template-columns:1fr}.arcade-hero{padding:15px}}
 @media(prefers-reduced-motion:reduce){.arcade-jet{animation:none!important;transition:none!important}.arcade-mission{transition:none}}
 
+
+/* Quantified impact simulator */
+.impact-hero{background:linear-gradient(115deg,#19364b,#0e1728);border:1px solid #35657f;border-radius:18px;padding:20px;margin-bottom:15px}
+.impact-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px;margin:14px 0}
+.impact-kpis>div{background:#13293d;border:1px solid #355b72;border-radius:12px;padding:12px}
+.impact-kpis small{display:block;color:#b5cbde}.impact-kpis b{font:700 1.6rem 'Barlow Condensed',sans-serif}
+.impact-fleet{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.impact-aircraft{background:#132739;border:1px solid #345a73;border-radius:13px;overflow:hidden}
+.impact-aircraft .photo-wrap{height:130px}
+.impact-aircraft section{padding:12px}
+.impact-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0}
+.impact-field select,.impact-field input{max-width:120px}
+.impact-guide{padding:12px;border:1px solid #2f6078;background:#102b41;border-radius:12px;margin:12px 0}
+.impact-track{height:110px;position:relative;background:linear-gradient(135deg,#102a3f,#173e55);overflow:hidden;border-radius:13px;border:1px solid #3c6782;margin:13px 0}
+.impact-track:before{content:"";position:absolute;top:50%;left:10%;right:10%;border-top:3px dashed #9ed4ec9e}
+.impact-flights{position:absolute;left:8%;top:23%;font-size:3rem;animation:impact-fly 2s ease-in-out infinite alternate;filter:drop-shadow(0 7px 4px #0009)}
+@keyframes impact-fly{to{left:79%;transform:translateY(-9px)}}
+.impact-meter{height:12px;background:#1d3a4b;border-radius:10px;overflow:hidden}.impact-meter>i{display:block;height:100%;background:linear-gradient(90deg,#4ccce3,#86dca8)}
+.impact-note{font-size:.89em;color:#b7cada}
+.impact-log{max-height:225px;overflow:auto;list-style:none;padding:0}.impact-log li{border-left:3px solid #4381a1;padding:7px 10px;margin:6px 0;background:#152b3b}
+@media(prefers-reduced-motion:reduce){.impact-flights{animation:none}}
+
 </style></head><body>
 <header><div class="radar" aria-hidden="true"></div><h1>Air &amp; Space Command Academy</h1>
 <p>Learn what each asset does, build a training force package, and load the cargo. All scenarios are fictional.</p></header>
@@ -649,7 +671,101 @@ const item=m.stages[ACD.i];return '<section class="arcade-hero"><span class="ac-
 V.arcade=arcadeView;TABS.unshift(["arcade","🎮 Mission Arcade"]);
 document.addEventListener("click",e=>{const b=e.target.closest("[data-arcade-start],[data-arcade-menu],[data-arcade-choice],[data-arcade-next],[data-arcade-learn]");if(!b)return;if(b.hasAttribute("data-arcade-start")){S.view="arcade";arcadeStart(b.dataset.arcadeStart)}else if(b.hasAttribute("data-arcade-menu")){ACD.mission=null;S.view="arcade";draw()}else if(b.hasAttribute("data-arcade-choice"))arcadeChoose(+b.dataset.arcadeChoice);else if(b.hasAttribute("data-arcade-next"))arcadeNext();else if(b.hasAttribute("data-arcade-learn"))modalAsset(b.dataset.arcadeLearn)});
 
-S.view='arcade';
+
+/* ---------- IMPACT LAB: transparent fictional logistics planning model ---------- */
+/* Public max payloads are reference facts, not automatic mission loads.
+   Game sortie loads, airport limitations, team handling, casualty capacities and
+   relief consumption rates are explicitly fictional classroom assumptions. */
+const IMPACT_TYPES={
+c5:{short:"C-5M",max:281001,training:180000,cost:7,patients:0,role:"Heavy supplies",airports:["major"]},
+c17:{short:"C-17",max:170900,training:100000,cost:5,patients:8,role:"Supplies or medical evacuation",airports:["major","regional"]},
+c130:{short:"C-130J-30",max:44000,training:30000,cost:2,patients:3,role:"Flexible supplies or medical evacuation",airports:["major","regional","austere"]}
+};
+const IMPACT_AIRPORTS={major:"Major airport (all aircraft)",regional:"Regional airport (C-17 / C-130)",austere:"Austere airstrip (C-130 only)"};
+const IP={phase:"setup",day:1,days:5,stock:700000,patients:26,needed:500000,needsPatients:20,quality:90,teams:3,budget:80,used:0,rawDelivered:0,usable:0,patientsMoved:0,attempted:0,blocked:0,log:[],airport:"regional",fleet:{c5:0,c17:2,c130:2},med:{c5:0,c17:1,c130:1},last:[],history:[]};
+const fmtImpact=n=>Math.round(n).toLocaleString("en-US");
+function impactReset(){Object.assign(IP,{phase:"setup",day:1,days:5,stock:700000,patients:26,needed:500000,needsPatients:20,quality:90,teams:3,budget:80,used:0,rawDelivered:0,usable:0,patientsMoved:0,attempted:0,blocked:0,log:[],airport:"regional",fleet:{c5:0,c17:2,c130:2},med:{c5:0,c17:1,c130:1},last:[],history:[]});draw()}
+function impactValidation(){
+ const err=[];
+ for(const k of Object.keys(IMPACT_TYPES)){if(IP.fleet[k]+IP.med[k]>5)err.push(IMPACT_TYPES[k].short+" exceeds five training aircraft.");if(IP.med[k]&&!IMPACT_TYPES[k].patients)err.push(IMPACT_TYPES[k].short+" is cargo-only in this particular scenario.")}
+ if(!Object.values(IP.fleet).some(Boolean)&&!Object.values(IP.med).some(Boolean))err.push("Choose at least one available aircraft.");
+ return err;
+}
+function impactDay(){
+ if(IP.phase==="finished")return;
+ const err=impactValidation();if(err.length){showToast("⚠ "+err[0]);return}
+ const day=IP.day;
+ /* scripted, disclosed exercise conditions, not weather prediction */
+ const weather=day===2?.75:day===4?.5:1;
+ const heavyClosed=day===4;
+ const teamCapacity=IP.teams*60000;
+ let offloadLeft=teamCapacity, cargo=0, usable=0, evacuated=0, spent=0, flew=0, denied=0;
+ let lines=[];
+ for(const k of ["c5","c17","c130"]){
+  const t=IMPACT_TYPES[k];
+  for(let n=0;n<IP.fleet[k];n++){
+    if(!t.airports.includes(IP.airport)||heavyClosed&&k!=="c130"){denied++;lines.push(t.short+" cargo flight held: runway limitation.");continue}
+    if(IP.used+spent+t.cost>IP.budget){denied++;lines.push(t.short+" cargo flight held: insufficient simulation budget.");continue}
+    if(IP.stock<=0){lines.push(t.short+" not dispatched: no cargo inventory remains.");continue}
+    const planned=Math.floor(t.training*weather);
+    const loaded=Math.min(IP.stock,planned);
+    if(loaded>offloadLeft){denied++;lines.push(t.short+" cargo flight held: receiving crews cannot unload this load today.");continue}
+    IP.stock-=loaded;offloadLeft-=loaded;cargo+=loaded;usable+=Math.round(loaded*IP.quality/100);
+    spent+=t.cost;flew++;lines.push(t.short+" delivered "+fmtImpact(loaded)+" lb; "+fmtImpact(Math.round(loaded*IP.quality/100))+" lb usable.");
+  }
+ }
+ for(const k of ["c17","c130"]){
+  const t=IMPACT_TYPES[k];
+  for(let n=0;n<IP.med[k];n++){
+   if(!t.airports.includes(IP.airport)||heavyClosed&&k!=="c130"){denied++;lines.push(t.short+" medical flight held: runway limitation.");continue}
+   if(IP.used+spent+t.cost>IP.budget){denied++;lines.push(t.short+" medical flight held: insufficient simulation budget.");continue}
+   const moved=Math.min(IP.patients,t.patients,Math.max(1,Math.floor(t.patients*weather)));
+   if(!IP.patients){lines.push(t.short+" medical flight not needed: no patients waiting.");continue}
+   IP.patients-=moved;evacuated+=moved;spent+=t.cost;flew++;
+   lines.push(t.short+" evacuated "+moved+" patient"+(moved===1?"":"s")+".");
+  }
+ }
+ IP.rawDelivered+=cargo;IP.usable+=usable;IP.patientsMoved+=evacuated;
+ IP.used+=spent;IP.attempted+=flew;IP.blocked+=denied;
+ IP.last=lines;IP.history.push({day,cargo,usable,evacuated,spent,flew,denied});
+ IP.log.unshift(...lines.map(line=>"Day "+day+": "+line));
+ if(day===2)IP.log.unshift("Day 2: weather reduces planned loads and medical movement to 75% in this fictional model.");
+ if(day===4)IP.log.unshift("Day 4: runway restrictions close the destination to heavy-aircraft arrivals.");
+ if(day>=IP.days){IP.phase="finished";showToast("🏁 Mission debrief ready")}else{IP.day++;IP.phase="running";showToast("✈ Day "+day+" complete: "+fmtImpact(usable)+" usable lb delivered")}
+ draw();
+}
+function impactConfig(k,v){
+ const n=Number(v);
+ if(k==="airport"){IP.airport=v}else if(k==="quality")IP.quality=Math.max(50,Math.min(100,n));
+ else if(k==="teams")IP.teams=Math.max(1,Math.min(6,n));
+ else if(k==="budget")IP.budget=Math.max(20,Math.min(160,n));
+ else if(k.startsWith("cargo:")){const id=k.slice(6);if(IMPACT_TYPES[id])IP.fleet[id]=Math.max(0,Math.min(5,n))}
+ else if(k.startsWith("med:")){const id=k.slice(4);if(IMPACT_TYPES[id])IP.med[id]=Math.max(0,Math.min(5,n))}
+ IP.phase="setup";draw();
+}
+function impactView(){
+ const pct=Math.min(100,Math.round(IP.usable/IP.needed*100));
+ const medPct=Math.min(100,Math.round(IP.patientsMoved/IP.needsPatients*100));
+ const result=IP.usable>=IP.needed&&IP.patientsMoved>=IP.needsPatients;
+ const kpi='<div class="impact-kpis"><div><small>Day</small><b>'+Math.min(IP.day,IP.days)+' / '+IP.days+'</b></div><div><small>Usable supplies</small><b>'+fmtImpact(IP.usable)+' lb</b></div><div><small>Evacuated</small><b>'+IP.patientsMoved+' / '+IP.needsPatients+'</b></div><div><small>Budget left</small><b>'+fmtImpact(IP.budget-IP.used)+'</b></div></div>';
+ let h='<div class="impact-hero"><span class="ac-role">📊 QUANTITY • QUALITY • IMPACT</span><h2>Operations Reality Lab</h2><p>Plan a five-day fictional humanitarian airlift. Aircraft quantities, usable supply quality, runway access, receiving crews, medical capacity and resources all change the actual simulation outcome.</p><button data-impact-reset="1">↻ Reset mission</button></div>'+kpi;
+ h+='<div class="card"><h3>Measured mission objective</h3><p>Deliver <b>'+fmtImpact(IP.needed)+' lb of usable supplies</b> and evacuate <b>'+IP.needsPatients+' patients</b> within five simulated days.</p><p>Supplies: '+pct+'% ('+fmtImpact(IP.usable)+' usable of '+fmtImpact(IP.rawDelivered)+' physically delivered lb)</p><div class="impact-meter"><i style="width:'+pct+'%"></i></div><p>Medical evacuation: '+medPct+'%</p><div class="impact-meter"><i style="width:'+medPct+'%"></i></div><div class="impact-guide"><b>Real figures versus scenario assumptions:</b> Published aircraft maximum payloads are reference specifications. The per-sortie loads shown below, readiness, availability, patient seats, costs, weather, airport classes and unload rates are explicitly <b>fictional classroom assumptions</b>—not operational performance figures. "Impact" means measured progress on these fictional objectives, not predicted real-world casualties or effects.</div></div>';
+ if(IP.phase==="finished"){
+  h+='<div class="arcade-result"><h2>'+(result?"🏆 MISSION ACCOMPLISHED":"📋 MISSION INCOMPLETE")+'</h2><p>Usable cargo: <b>'+fmtImpact(IP.usable)+' lb</b> out of '+fmtImpact(IP.needed)+' lb goal. Patients safely moved: <b>'+IP.patientsMoved+'</b> out of '+IP.needsPatients+'.</p><p>Actual delivered weight: '+fmtImpact(IP.rawDelivered)+' lb. Quality reduced effective delivery by '+fmtImpact(IP.rawDelivered-IP.usable)+' lb. Dispatches completed: '+IP.attempted+'. Flights held: '+IP.blocked+'. Budget used: '+IP.used+'/'+IP.budget+' exercise points.</p><h3>Daily impact record</h3><table><tr><th>Day</th><th>Delivered lb</th><th>Usable lb</th><th>Patients</th><th>Points used</th></tr>'+IP.history.map(x=>'<tr><td>'+x.day+'</td><td>'+fmtImpact(x.cargo)+'</td><td>'+fmtImpact(x.usable)+'</td><td>'+x.evacuated+'</td><td>'+x.spent+'</td></tr>').join('')+'</table><p class="impact-note">Try a different mix of aircraft, more receiving teams, or higher-quality supplies and compare the outcomes.</p><button class="on" data-impact-reset="1">↻ Rebuild and replay</button></div>'
+ }else{
+  h+='<h3>Set your force package and support</h3><div class="two"><div class="card"><label class="impact-field">Destination airfield<select data-impact-change="airport">'+Object.entries(IMPACT_AIRPORTS).map(([k,v])=>'<option value="'+k+'" '+(IP.airport===k?'selected':'')+'>'+v+'</option>').join('')+'</select></label><label class="impact-field">Usable supply quality<select data-impact-change="quality">'+[50,65,75,85,90,95,100].map(x=>'<option value="'+x+'" '+(IP.quality===x?'selected':'')+'>'+x+'%</option>').join('')+'</select></label><label class="impact-field">Receiving cargo crews<select data-impact-change="teams">'+[1,2,3,4,5,6].map(x=>'<option value="'+x+'" '+(IP.teams===x?'selected':'')+'>'+x+'</option>').join('')+'</select></label><label class="impact-field">Available exercise budget<select data-impact-change="budget">'+[40,60,80,100,120,160].map(x=>'<option value="'+x+'" '+(IP.budget===x?'selected':'')+'>'+x+' points</option>').join('')+'</select></label></div><div class="card"><h3>Planning assumptions</h3><p class="impact-note">Each selected aircraft makes at most one flight per day. Each crew can unload 60,000 lb/day. The model has 700,000 lb stock and 26 patients awaiting evacuation.</p><p class="impact-note">Day 2: reduced aircraft capacity due to weather. Day 4: heavy-aircraft runway restriction. Flight budgets and medical seats are game values, not real performance data.</p><p class="impact-note">A failed runway or budget validation holds a flight before any cargo moves or points are deducted.</p></div></div>';
+  h+='<div class="impact-fleet">'+Object.entries(IMPACT_TYPES).map(([k,t])=>'<div class="impact-aircraft">'+photo(k)+'<section><h3>'+t.short+'</h3><p>'+esc(t.role)+'</p><p><b>Published max payload:</b> '+fmtImpact(t.max)+' lb<br><b>Scenario planning load:</b> '+fmtImpact(t.training)+' lb/flight<br><b>Fictional budget:</b> '+t.cost+' points/flight</p><label class="impact-field">Cargo aircraft<select data-impact-change="cargo:'+k+'">'+[0,1,2,3,4,5].map(n=>'<option value="'+n+'" '+(IP.fleet[k]===n?'selected':'')+'>'+n+'</option>').join('')+'</select></label>'+ (t.patients?'<label class="impact-field">Medical aircraft<select data-impact-change="med:'+k+'">'+[0,1,2,3,4,5].map(n=>'<option value="'+n+'" '+(IP.med[k]===n?'selected':'')+'>'+n+'</option>').join('')+'</select></label><p class="impact-note">Scenario medical capacity: '+t.patients+' patients/flight</p>':'<p class="impact-note">Not a medical role in this scenario.</p>')+'</section></div>').join('')+'</div>';
+  const errs=impactValidation();if(errs.length)h+='<div class="ev" role="alert">'+errs.map(esc).join('<br>')+'</div>';
+  h+='<div class="impact-track"><span style="position:absolute;left:5%;bottom:8%;color:#c4e7fb">BASE</span><span class="impact-flights">✈️</span><span style="position:absolute;right:4%;bottom:8%;color:#c4e7fb">RELIEF SITE</span></div><div class="row"><button class="on" data-impact-day="1" '+(errs.length?'disabled':'')+'>▶ Execute day '+IP.day+' and calculate impact</button><button data-impact-reset="1">Reset</button></div>';
+ }
+ if(IP.history.length){h+='<section class="card"><h3>Mission operations log</h3><ul class="impact-log">'+IP.log.slice(0,30).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></section>'}
+ return h;
+}
+V.impact=impactView;TABS.splice(1,0,["impact","📊 Impact Lab"]);
+document.addEventListener("change",e=>{const c=e.target.closest("[data-impact-change]");if(c)impactConfig(c.dataset.impactChange,c.value)});
+document.addEventListener("click",e=>{if(e.target.closest("[data-impact-reset]"))impactReset();else if(e.target.closest("[data-impact-day]"))impactDay()});
+
+S.view='impact';
 
 draw();
 </script></body></html>
